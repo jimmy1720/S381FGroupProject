@@ -3,10 +3,10 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const User = require('./models/User');
+const User = require('../models/User');
 const session = require('express-session');
 const dotenv = require('dotenv');
-const { DatabaseHandler } = require('./config/db');
+const { DatabaseHandler } = require('../config/db');
 
 dotenv.config();
 
@@ -168,3 +168,4 @@ module.exports = function(app, passport) {
         });
     });
 };
+
