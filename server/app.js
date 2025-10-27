@@ -6,7 +6,7 @@ const passport = require('passport');
 const formidable = require('express-formidable');
 const dotenv = require('dotenv');
 
-const { isLoggedIn, setupPassportSerialization } = require('./server/middleware/authMiddleware');
+const { isLoggedIn, setupPassportSerialization } = require('./middleware/authMiddleware');
 
 // Load environment variables
 dotenv.config();
@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 8099;
 
 // Middleware setup
 app.set('view engine', 'ejs');
-app.set('views', './client/views');
+app.set('views', '../client/views');
 
 app.use(session({
     secret: 'COMPS381F_GROUPPROJECT',
@@ -48,3 +48,4 @@ app.get('/', isLoggedIn, (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
+
