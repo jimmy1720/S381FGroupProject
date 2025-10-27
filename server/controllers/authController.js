@@ -1,8 +1,8 @@
 // authController.js
 
 const bcrypt = require('bcrypt');
-const User = require('./models/User');
-const DatabaseHandler = require('./config/db');
+const User = require('../models/User');
+const DatabaseHandler = require('../config/db');
 
 /**
  * Handle user login with local strategy.
@@ -77,3 +77,4 @@ module.exports = {
     login,
     register
 };
+
