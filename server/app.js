@@ -44,8 +44,8 @@ setupPassportSerialization(passport);
 app.use('/', require('./authRoutes')); // Ensure the routes are correctly imported
 
 // Example home redirect
-app.get('/', isLoggedIn, (req, res) => {
-    res.redirect('/dashboard');
+app.get('/dashboard', isLoggedIn, (req, res) => {
+    res.render('dashboard', { user: req.session.user }); // Render the dashboard view
 });
 
 // 404 handler
