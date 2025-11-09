@@ -40,12 +40,8 @@ app.use('/public', express.static('../client/public'));
 // Passport Middleware Serialization
 setupPassportSerialization(passport);
 
-// Load Auth Routes (handles auth logic and registration/login)
-<<<<<<< Updated upstream
-require('./authRoutes')(app, passport);
-=======
+
 app.use('/', require('./authRoutes')); // Ensure the routes are correctly imported
->>>>>>> Stashed changes
 
 // Example home redirect
 app.get('/', isLoggedIn, (req, res) => {
@@ -68,9 +64,7 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-<<<<<<< Updated upstream
 
-=======
 // Utility Functions
 function createSessionConfig() {
     return {
@@ -85,4 +79,3 @@ function createSessionConfig() {
 function handleError(error) {
     console.error('Session store error:', error);
 }
->>>>>>> Stashed changes
