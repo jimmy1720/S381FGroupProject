@@ -3,7 +3,7 @@
 const User = require('../models/User'); // Import the User model (adjust the path as needed)
 
 /**
- * Middleware to check if user is logged in, either via Passport or session.
+ * Middleware to check if the user is logged in, either via Passport or session.
  * Redirects to /login if the user is not authenticated.
  */
 function isLoggedIn(req, res, next) {
@@ -18,7 +18,7 @@ function isLoggedIn(req, res, next) {
     }
 
     // Log unauthorized access attempt and redirect to login
-    console.log('Unauthorized access attempt. Redirecting to login.');
+    console.warn('Unauthorized access attempt. Redirecting to login.');
     res.redirect('/login');
 }
 
@@ -33,13 +33,14 @@ function setupPassportSerialization(passport) {
     });
 
     // Deserialize user: Retrieve the full user object from the database
-    passport.deserializeUser((id, done) => {
-        User.findById(id, (err, user) => {
-            if (err) {
-                return done(err);
-            }
+    passport.deserializeUser(async (id, done) => {
+        try {
+            const user = await User.findById(id);
             done(null, user);
-        });
+        } catch (err) {
+            console.error('Error fetching user for deserialization:', err);
+            done(err);
+        }
     });
 }
 

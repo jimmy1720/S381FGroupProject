@@ -20,23 +20,29 @@ async function login(req, res) {
         if (!users || users.length === 0) {
             return res.render('login', { error: 'User not found' });
         }
+
         const user = users[0];
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) {
             return res.render('login', { error: 'Invalid password' });
         }
+
+        // Store user session information
         req.session.user = {
             id: user._id.toString(),
             name: user.username,
             type: 'local'
         };
+
         req.session.save((err) => {
             if (err) {
-                return res.render('login', { error: 'Login failed' });
+                console.error('Session save error:', err); // Log error for debugging
+                return res.render('login', { error: 'Login failed. Please try again.' });
             }
-            res.redirect('/content');
+            res.redirect('/dashboard'); // Redirect to dashboard after successful login
         });
     } catch (err) {
+        console.error('Login error:', err); // Log error for debugging
         res.render('login', { error: 'Login failed: ' + err.message });
     }
 }
@@ -47,18 +53,22 @@ async function login(req, res) {
 async function register(req, res) {
     try {
         const { username, email, password, confirm_password } = req.fields;
+
         if (password !== confirm_password) {
             return res.render('register', { error: 'Passwords do not match' });
         }
+
         const existingUser = await DatabaseHandler.findDocument(User, {
             $or: [
                 { username: username },
                 { email: email }
             ]
         });
+
         if (existingUser && existingUser.length > 0) {
             return res.render('register', { error: 'Username or email already exists' });
         }
+
         const hashedPassword = await bcrypt.hash(password, 10);
         await DatabaseHandler.insertDocument(User, {
             username,
@@ -67,9 +77,11 @@ async function register(req, res) {
             type: 'local',
             created_at: new Date()
         });
+
         res.render('login', { message: 'Registration successful! Please login.' });
     } catch (err) {
-        res.render('register', { error: 'Registration failed' });
+        console.error('Registration error:', err); // Log error for debugging
+        res.render('register', { error: 'Registration failed: ' + err.message });
     }
 }
 
@@ -77,4 +89,3 @@ module.exports = {
     login,
     register
 };
-

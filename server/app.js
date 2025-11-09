@@ -55,7 +55,7 @@ require('./authRoutes')(app, passport);
 
 // Example home redirect
 app.get('/', isLoggedIn, (req, res) => {
-    res.redirect('/content');
+    res.redirect('/dashboard');
 });
 
 // 404 handler

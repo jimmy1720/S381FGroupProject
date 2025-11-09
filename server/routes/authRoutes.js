@@ -4,36 +4,36 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
-const session = require('express-session');
 const dotenv = require('dotenv');
 const { DatabaseHandler } = require('../config/db');
 
 dotenv.config();
 
 function isLoggedIn(req, res, next) {
-    if (req.isAuthenticated() || req.session || req.session.user) {
+    if (req.isAuthenticated() && req.session.user) {
         return next();
     }
     res.redirect('/login');
 }
 
+// Passport strategies config (config section)
+const FacebookStrategy = require('passport-facebook').Strategy;
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+
+const facebookAuth = {
+    clientID: process.env.FACEBOOK_APP_ID,
+    clientSecret: process.env.FACEBOOK_APP_SECRET,
+    callbackURL: process.env.FACEBOOK_CALLBACK_URL
+};
+
+const googleAuth = {
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: process.env.GOOGLE_CALLBACK_URL
+};
+
 module.exports = function(app, passport) {
-    // Passport strategies config (config section)
-    const facebookAuth = {
-        clientID: process.env.FACEBOOK_APP_ID,
-        clientSecret: process.env.FACEBOOK_APP_SECRET,
-        callbackURL: process.env.FACEBOOK_CALLBACK_URL
-    };
-    const googleAuth = {
-        clientID: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: process.env.GOOGLE_CALLBACK_URL
-    };
-
-    const FacebookStrategy = require('passport-facebook').Strategy;
-    const GoogleStrategy = require('passport-google-oauth20').Strategy;
-
-    passport.use(new FacebookStrategy(facebookAuth, function(token, refreshToken, profile, done) {
+    passport.use(new FacebookStrategy(facebookAuth, (token, refreshToken, profile, done) => {
         const user = {
             id: profile.id,
             name: profile.displayName,
@@ -42,7 +42,7 @@ module.exports = function(app, passport) {
         return done(null, user);
     }));
 
-    passport.use(new GoogleStrategy(googleAuth, function(token, refreshToken, profile, done) {
+    passport.use(new GoogleStrategy(googleAuth, (token, refreshToken, profile, done) => {
         const user = {
             id: profile.id,
             name: profile.displayName,
@@ -60,19 +60,19 @@ module.exports = function(app, passport) {
     });
 
     // Login page
-    app.get("/login", function(req, res) {
+    app.get("/login", (req, res) => {
         res.render("login");
     });
 
     // Register page
-    app.get("/register", function(req, res) {
+    app.get("/register", (req, res) => {
         res.render("register");
     });
 
     // Login logic
     app.post('/login', async (req, res) => {
         try {
-            const { username, password } = req.fields;
+            const { username, password } = req.fields; // Assuming express-formidable is used
             const users = await DatabaseHandler.findDocument(User, {
                 $or: [
                     { username: username },
@@ -96,9 +96,10 @@ module.exports = function(app, passport) {
                 if (err) {
                     return res.render('login', { error: 'Login failed' });
                 }
-                res.redirect('/content');
+                res.redirect('/dashboard'); // Redirect to dashboard after login
             });
         } catch (err) {
+            console.error('Login error:', err);
             res.render('login', { error: 'Login failed: ' + err.message });
         }
     });
@@ -124,36 +125,33 @@ module.exports = function(app, passport) {
                 username,
                 email,
                 password: hashedPassword,
-                type: 'local',
+                type: 'local', // Ensure consistent user type
                 created_at: new Date()
             });
             res.render('login', { message: 'Registration successful! Please login.' });
         } catch (err) {
-            res.render('register', { error: 'Registration failed' });
+            console.error('Registration error:', err);
+            res.render('register', { error: 'Registration failed: ' + err.message });
         }
     });
 
     // OAuth: Facebook
     app.get("/auth/facebook", passport.authenticate("facebook", { scope: "email", session: true }));
-    app.get("/auth/facebook/callback",
-        passport.authenticate("facebook", {
-            successRedirect: "/content",
-            failureRedirect: "/"
-        })
-    );
+    app.get("/auth/facebook/callback", passport.authenticate("facebook", {
+        successRedirect: "/dashboard", // Redirect to dashboard after successful login
+        failureRedirect: "/login"
+    }));
 
     // OAuth: Google
     app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'], session: true }));
-    app.get('/auth/google/callback',
-        passport.authenticate('google', {
-            successRedirect: '/content',
-            failureRedirect: '/'
-        })
-    );
+    app.get('/auth/google/callback', passport.authenticate('google', {
+        successRedirect: '/dashboard', // Redirect to dashboard after successful login
+        failureRedirect: '/login'
+    }));
 
     // Logout route
-    app.get("/logout", function(req, res, next) {
-        req.logout(function(err) {
+    app.get("/logout", (req, res, next) => {
+        req.logout((err) => {
             if (err) { return next(err); }
             res.redirect('/login');
         });
@@ -168,4 +166,3 @@ module.exports = function(app, passport) {
         });
     });
 };
-
