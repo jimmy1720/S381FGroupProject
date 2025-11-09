@@ -1,12 +1,15 @@
-// app.js
-
 const express = require('express');
 const session = require('express-session');
 const passport = require('passport');
 const formidable = require('express-formidable');
+const MongoDBStore = require('connect-mongodb-session')(session);
+const connectDB = require('./config/db');
 const dotenv = require('dotenv');
+const morgan = require('morgan');
+
 
 const { isLoggedIn, setupPassportSerialization } = require('./middleware/authMiddleware');
+
 
 // Load environment variables
 dotenv.config();
@@ -14,21 +17,35 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8099;
 
+// Connect to MongoDB
+connectDB();
+
+// Set up MongoDB session store
+const store = new MongoDBStore({
+    uri: process.env.MONGODB_URI,
+    collection: 'sessions',
+});
+
+store.on('error', (error) => {
+    console.error('Session store error:', error);
+});
+
 // Middleware setup
 app.set('view engine', 'ejs');
 app.set('views', '../client/views');
 
+app.use(morgan('dev')); // Logging middleware
 app.use(session({
-    secret: 'COMPS381F_GROUPPROJECT',
+    secret: process.env.SESSION_SECRET || 'default_secret',
     resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 }
+    saveUninitialized: false,
+    store: store,
+    cookie: { secure: process.env.NODE_ENV === 'production', maxAge: 24 * 60 * 60 * 1000 },
 }));
-
 app.use(passport.initialize());
 app.use(passport.session());
-
-app.use('/public', express.static('public'));
+app.use(formidable());
+app.use('/public', express.static('../client/public'));
 
 // Passport Middleware Serialization
 setupPassportSerialization(passport);
@@ -36,12 +53,23 @@ setupPassportSerialization(passport);
 // Load Auth Routes (handles auth logic and registration/login)
 require('./authRoutes')(app, passport);
 
-// Load other routes (audio management, etc.)
-// require('./audioRoutes')(app, isLoggedIn);
+// Load other routes (e.g., audio management, etc.)
+require('./audioRoutes')(app, isLoggedIn);
 
 // Example home redirect
 app.get('/', isLoggedIn, (req, res) => {
     res.redirect('/content');
+});
+
+// 404 handler
+app.use((req, res) => {
+    res.status(404).render('404', { title: 'Page Not Found' });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+    console.error('Global error handler:', err);
+    res.status(500).send('Something went wrong!');
 });
 
 // Start server
