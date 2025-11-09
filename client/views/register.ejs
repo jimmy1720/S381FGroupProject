@@ -1,10 +1,13 @@
-<!-- register.ejs -->
-<html>
+<!doctype html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
     <style>
         .container {
-            max-width: 400px;
+            max-width: 400px; /* Adjusted for a better mobile view */
             margin: 50px auto;
             padding: 20px;
             font-family: Arial, sans-serif;
@@ -14,6 +17,7 @@
             padding: 20px;
             border: 1px solid #ddd;
             border-radius: 5px;
+            background-color: #f9f9f9; /* Added background color for contrast */
         }
 
         input[type="text"], input[type="password"], input[type="email"] {
@@ -44,6 +48,12 @@
         .error-message {
             color: red;
             margin: 10px 0;
+            text-align: center; /* Center align error message */
+        }
+
+        h2 {
+            text-align: center; /* Center the heading */
+            margin-bottom: 20px; /* Space below the heading */
         }
     </style>
 </head>
@@ -51,6 +61,13 @@
     <div class="container">
         <div class="register-section">
             <h2>Register</h2>
+
+            <% if (typeof error !== 'undefined' && error) { %>
+                <div class="error-message">
+                    <%= error %>
+                </div>
+            <% } %>
+
             <form action="/register" method="POST">
                 <div>
                     <label for="username">Username:</label>
@@ -75,12 +92,8 @@
                 <p>Already have an account? <a href="/login">Login here</a></p>
             </div>
         </div>
-
-        <% if (typeof error !== 'undefined' && error) { %>
-            <div class="error-message">
-                <%= error %>
-            </div>
-        <% } %>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
