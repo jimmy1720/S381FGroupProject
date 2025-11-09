@@ -53,9 +53,6 @@ setupPassportSerialization(passport);
 // Load Auth Routes (handles auth logic and registration/login)
 require('./authRoutes')(app, passport);
 
-// Load other routes (e.g., audio management, etc.)
-require('./audioRoutes')(app, isLoggedIn);
-
 // Example home redirect
 app.get('/', isLoggedIn, (req, res) => {
     res.redirect('/content');
@@ -76,4 +73,5 @@ app.use((err, req, res, next) => {
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
+
 
