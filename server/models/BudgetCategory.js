@@ -15,13 +15,10 @@ const budgetCategorySchema = new mongoose.Schema({
     },
     budgetLimit: {
         type: Number,
-        default: 0 // Default to 0 if no limit is set
-    },
-    created_at: {
-        type: Date,
-        default: Date.now
+        default: 0,
+        min: 0 // Ensure budgetLimit is non-negative
     }
-});
+}, { timestamps: true }); // Automatically manage createdAt and updatedAt
 
 // Explicitly specify the collection name as "budgetCategories"
 const BudgetCategory = mongoose.model('BudgetCategory', budgetCategorySchema, 'budgetCategories');

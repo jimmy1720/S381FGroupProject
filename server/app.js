@@ -7,9 +7,7 @@ const connectDB = require('./config/db');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
 
-
 const { isLoggedIn, setupPassportSerialization } = require('./middleware/authMiddleware');
-
 
 // Load environment variables
 dotenv.config();
@@ -22,26 +20,18 @@ connectDB();
 
 // Set up MongoDB session store
 const store = new MongoDBStore({
-    uri: process.env.MONGODB_URI,
+    uri: process.env.MONGO_URI,
     collection: 'sessions',
 });
 
-store.on('error', (error) => {
-    console.error('Session store error:', error);
-});
+store.on('error', handleError); // Centralized error handling for session store
 
 // Middleware setup
 app.set('view engine', 'ejs');
 app.set('views', '../client/views');
 
 app.use(morgan('dev')); // Logging middleware
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'default_secret',
-    resave: false,
-    saveUninitialized: false,
-    store: store,
-    cookie: { secure: process.env.NODE_ENV === 'production', maxAge: 24 * 60 * 60 * 1000 },
-}));
+app.use(session(createSessionConfig())); // Centralized session configuration
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(formidable());
@@ -51,7 +41,11 @@ app.use('/public', express.static('../client/public'));
 setupPassportSerialization(passport);
 
 // Load Auth Routes (handles auth logic and registration/login)
+<<<<<<< Updated upstream
 require('./authRoutes')(app, passport);
+=======
+app.use('/', require('./authRoutes')); // Ensure the routes are correctly imported
+>>>>>>> Stashed changes
 
 // Example home redirect
 app.get('/', isLoggedIn, (req, res) => {
@@ -66,7 +60,7 @@ app.use((req, res) => {
 // Global error handler
 app.use((err, req, res, next) => {
     console.error('Global error handler:', err);
-    res.status(500).send('Something went wrong!');
+    res.status(500).send('Something went wrong!'); // Consider rendering an error page
 });
 
 // Start server
@@ -74,4 +68,21 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
 
+<<<<<<< Updated upstream
 
+=======
+// Utility Functions
+function createSessionConfig() {
+    return {
+        secret: process.env.SESSION_SECRET || 'default_secret',
+        resave: false,
+        saveUninitialized: false,
+        store: store,
+        cookie: { secure: process.env.NODE_ENV === 'production', maxAge: 24 * 60 * 60 * 1000 },
+    };
+}
+
+function handleError(error) {
+    console.error('Session store error:', error);
+}
+>>>>>>> Stashed changes
