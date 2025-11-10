@@ -180,7 +180,7 @@ npm start
 # Open http://localhost:8099 in browser
 ```
 ### Environment Configuration
-This included .env file contains:
+This included `.env` file contains:
 * MongDB connection string
 * Session secret Key
 * OAuth credentials (Facebook/Google - optional)
