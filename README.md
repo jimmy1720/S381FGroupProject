@@ -134,6 +134,7 @@ GET  /logout            # User logout
 GET  /auth/facebook     # Facebook OAuth
 GET  /auth/google       # Google OAuth
 GET  /user/info         # Get current user information
+```
 
 ### CURL Testing Commands:
 
