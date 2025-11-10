@@ -1,49 +1,39 @@
-// authMiddleware.js
+const User = require('../models/User');
 
-const User = require('../models/userModel'); // Import the User model
-
-/**
- * Middleware to check if the user is logged in, either via Passport or session.
- * Redirects to /login if the user is not authenticated.
- */
+// Check if user is logged in
 function isLoggedIn(req, res, next) {
-    // Check if the user is authenticated via Passport
-    if (req.isAuthenticated && req.isAuthenticated()) {
+    if (req.isAuthenticated()) {
         return next();
     }
-
-    // Check if the user session exists
-    if (req.session && req.session.user) {
-        return next();
-    }
-
-    // Log unauthorized access attempt and redirect to login
-    console.log(`Unauthorized access attempt by ${req.ip}. Redirecting to login.`);
     res.redirect('/login');
 }
 
-/**
- * Passport serialization and deserialization helpers.
- */
+// Check if user is not logged in (for login/register pages)
+function isNotLoggedIn(req, res, next) {
+    if (!req.isAuthenticated()) {
+        return next();
+    }
+    res.redirect('/dashboard');
+}
+
+// Passport serialization/deserialization
 function setupPassportSerialization(passport) {
-    // Serialize user: Store only the user ID in the session
     passport.serializeUser((user, done) => {
-        done(null, user._id); // Store only the user ID
+        done(null, user.id);
     });
 
-    // Deserialize user: Retrieve the full user object from the database
     passport.deserializeUser(async (id, done) => {
         try {
             const user = await User.findById(id);
-            done(null, user); // Pass user to the done callback
+            done(null, user);
         } catch (err) {
-            console.error('Error fetching user for deserialization:', err);
-            done(err); // Pass the error to the done callback
+            done(err, null);
         }
     });
 }
 
 module.exports = {
     isLoggedIn,
+    isNotLoggedIn,
     setupPassportSerialization
 };

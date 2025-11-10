@@ -1,4 +1,3 @@
-// models/userModel.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
@@ -13,23 +12,40 @@ const userSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        required: [true, 'Email is required'],
+        required: function() {
+            return this.type === 'local'; // Only required for local accounts
+        },
         unique: true,
+        sparse: true, // Allow multiple nulls for OAuth users
         trim: true,
-        match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Please fill a valid email address'] // Regex for validating email format
+        match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Please fill a valid email address']
     },
     password: {
         type: String,
-        required: [true, 'Password is required'],
-        minlength: [8, 'Password must be at least 8 characters long'] // Enforce a minimum password length
+        required: function() {
+            return this.type === 'local'; // Only required for local accounts
+        },
+        minlength: [8, 'Password must be at least 8 characters long']
     },
     type: {
         type: String,
         enum: {
             values: ['local', 'google', 'facebook'],
-            message: '{VALUE} is not a valid user type' // Custom message for enum validation
+            message: '{VALUE} is not a valid user type'
         },
         default: 'local'
+    },
+    googleId: {
+        type: String,
+        sparse: true
+    },
+    facebookId: {
+        type: String,
+        sparse: true
+    },
+    displayName: {
+        type: String,
+        trim: true
     },
     created_at: {
         type: Date,
@@ -37,24 +53,27 @@ const userSchema = new mongoose.Schema({
     }
 });
 
-// Hash the password before saving the user
+// Hash the password before saving the user (only for local accounts)
 userSchema.pre('save', async function(next) {
-    if (!this.isModified('password')) {
-        return next(); // Skip hashing if the password hasn't changed
+    if (this.type !== 'local' || !this.isModified('password')) {
+        return next();
     }
 
     try {
-        const salt = await bcrypt.genSalt(10); // Generate a salt with 10 rounds
-        this.password = await bcrypt.hash(this.password, salt); // Hash the password
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password, salt);
         next();
     } catch (error) {
-        next(new Error('Error hashing password')); // Pass a custom error message
+        next(new Error('Error hashing password'));
     }
 });
 
-// Method to compare password for login
+// Method to compare password for login (only for local accounts)
 userSchema.methods.comparePassword = async function(candidatePassword) {
-    return bcrypt.compare(candidatePassword, this.password); // Compare the hashed password
+    if (this.type !== 'local') {
+        throw new Error('This account uses social login');
+    }
+    return bcrypt.compare(candidatePassword, this.password);
 };
 
 const User = mongoose.model('User', userSchema, 'users');

@@ -1,45 +1,78 @@
-// authController.js
-
 const User = require('../models/User');
+const bcrypt = require('bcrypt');
 
 /**
  * Handle user login with local strategy.
  */
 async function login(req, res) {
     try {
-        const { username, password } = req.body; // Use req.body for form data
+        const { username, password } = req.body;
+        
+        if (!username || !password) {
+            return res.render('login', { 
+                error: 'Username and password are required',
+                message: null,
+                showFacebook: !!process.env.FACEBOOK_APP_ID,
+                showGoogle: !!process.env.GOOGLE_CLIENT_ID
+            });
+        }
+
         const user = await User.findOne({
             $or: [
-                { username: username.toLowerCase() }, // Normalize username
-                { email: username.toLowerCase() } // Normalize email
+                { username: username.toLowerCase() },
+                { email: username.toLowerCase() }
             ]
         });
 
         if (!user) {
-            return res.render('login', { error: 'User not found' });
+            return res.render('login', { 
+                error: 'Invalid username or password',
+                message: null,
+                showFacebook: !!process.env.FACEBOOK_APP_ID,
+                showGoogle: !!process.env.GOOGLE_CLIENT_ID
+            });
         }
 
-        const isValid = await user.comparePassword(password); // Use method from the user model
+        // For OAuth users without passwords
+        if (user.type !== 'local') {
+            return res.render('login', { 
+                error: 'This account was created with social login. Please use the social login option.',
+                message: null,
+                showFacebook: !!process.env.FACEBOOK_APP_ID,
+                showGoogle: !!process.env.GOOGLE_CLIENT_ID
+            });
+        }
+
+        const isValid = await user.comparePassword(password);
         if (!isValid) {
-            return res.render('login', { error: 'Invalid password' });
+            return res.render('login', { 
+                error: 'Invalid username or password',
+                message: null,
+                showFacebook: !!process.env.FACEBOOK_APP_ID,
+                showGoogle: !!process.env.GOOGLE_CLIENT_ID
+            });
         }
 
-        req.session.user = {
-            id: user._id.toString(),
-            name: user.username,
-            type: user.type
-        };
-
-        req.session.save(err => {
+        req.login(user, (err) => {
             if (err) {
-                console.error('Session save error:', err); // Log the error
-                return res.render('login', { error: 'Login failed. Please try again.' });
+                console.error('Login error:', err);
+                return res.render('login', { 
+                    error: 'Login failed. Please try again.',
+                    message: null,
+                    showFacebook: !!process.env.FACEBOOK_APP_ID,
+                    showGoogle: !!process.env.GOOGLE_CLIENT_ID
+                });
             }
-            res.redirect('/dashboard'); // Redirect to the dashboard after successful login
+            return res.redirect('/dashboard');
         });
     } catch (err) {
-        console.error('Login error:', err); // Log the error
-        res.render('login', { error: 'Login failed. Please try again.' });
+        console.error('Login error:', err);
+        res.render('login', { 
+            error: 'Login failed. Please try again.',
+            message: null,
+            showFacebook: !!process.env.FACEBOOK_APP_ID,
+            showGoogle: !!process.env.GOOGLE_CLIENT_ID
+        });
     }
 }
 
@@ -48,35 +81,75 @@ async function login(req, res) {
  */
 async function register(req, res) {
     try {
-        const { username, email, password, confirm_password } = req.body; // Use req.body for form data
+        const { username, email, password, confirm_password } = req.body;
+        
+        // Validation
+        if (!username || !email || !password || !confirm_password) {
+            return res.render('register', { 
+                error: 'All fields are required',
+                message: null,
+                showFacebook: !!process.env.FACEBOOK_APP_ID,
+                showGoogle: !!process.env.GOOGLE_CLIENT_ID
+            });
+        }
+
         if (password !== confirm_password) {
-            return res.render('register', { error: 'Passwords do not match' });
+            return res.render('register', { 
+                error: 'Passwords do not match',
+                message: null,
+                showFacebook: !!process.env.FACEBOOK_APP_ID,
+                showGoogle: !!process.env.GOOGLE_CLIENT_ID
+            });
+        }
+
+        if (password.length < 8) {
+            return res.render('register', { 
+                error: 'Password must be at least 8 characters long',
+                message: null,
+                showFacebook: !!process.env.FACEBOOK_APP_ID,
+                showGoogle: !!process.env.GOOGLE_CLIENT_ID
+            });
         }
 
         const existingUser = await User.findOne({
             $or: [
-                { username: username.toLowerCase() }, // Normalize username
-                { email: email.toLowerCase() } // Normalize email
+                { username: username.toLowerCase() },
+                { email: email.toLowerCase() }
             ]
         });
 
         if (existingUser) {
-            return res.render('register', { error: 'Username or email already exists' });
+            return res.render('register', { 
+                error: 'Username or email already exists',
+                message: null,
+                showFacebook: !!process.env.FACEBOOK_APP_ID,
+                showGoogle: !!process.env.GOOGLE_CLIENT_ID
+            });
         }
 
         const newUser = new User({
-            username,
-            email,
-            password, // This should be hashed in the model's pre-save hook
-            type: 'local',
-            created_at: new Date()
+            username: username.toLowerCase(),
+            email: email.toLowerCase(),
+            password: password,
+            type: 'local'
         });
 
-        await newUser.save(); // Ensure password hashing is handled in the model
-        res.render('login', { message: 'Registration successful! Please login.' });
+        await newUser.save();
+        
+        res.render('login', { 
+            error: null,
+            message: 'Registration successful! Please login.',
+            showFacebook: !!process.env.FACEBOOK_APP_ID,
+            showGoogle: !!process.env.GOOGLE_CLIENT_SECRET
+        });
     } catch (err) {
-        console.error('Registration error:', err); // Log the error
-        res.render('register', { error: 'Registration failed. Please try again.' });
+        console.error('Registration error:', err);
+        res.render('register', { 
+            error: 'Registration failed: ' + err.message,
+            message: null,
+            showFacebook: !!process.env.FACEBOOK_APP_ID,
+            showGoogle: !!process.env.GOOGLE_CLIENT_ID
+        });
     }
 }
 
