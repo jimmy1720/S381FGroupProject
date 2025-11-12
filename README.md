@@ -7,7 +7,7 @@
 - Alan ([Student 1 SID])
 - Abel (13032428) 
 - Ashwin-Sundar (13139477)
-- Tommy ([Student 4 SID])
+- Thomas (13035781)
 - Jimmy ([Student 5 SID])
 
 ## 2. Project File Structure
