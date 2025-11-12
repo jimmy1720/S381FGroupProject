@@ -16,8 +16,7 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="d-flex align-items-center">
-                    <button onclick="location.href='/login'" class="btn btn-outline-light btn-sm me-2">Login</button>
-                    <button onclick="location.href='/register'" class="btn btn-outline-light btn-sm">Register</button>
+                    <button onclick="location.href='/'" class="btn btn-outline-light btn-sm me-2">Logout</button>
                 </div>
             </div>
         </nav>
@@ -25,17 +24,46 @@
 <main class="container my-5">
 <h1>Dashboard</h1><br>
 <hr><br>
-<p>Total Income:<br>
-Total Expense:<br>
-Remaining Budget:</p>
+<h2>Total Income:</h2><p class="fs-5">111</p>
+<h2>Total Expense:</h2><p class="fs-5">111</p>
+<h2>Remaining Budget:</h2><p class="fs-5">111</p>
+<h2>Line Chart</h2>
+<canvas id="myChart" style="width:50%"></canvas>
+<h2>Pie Chart</h2>
+<canvas id="myPieChart" style="width:50%"></canvas>
 </main>
 <footer class="text-center py-4">
 <p>&copy; 2025 Budget Tracker. All rights reserved.</p>
 </footer>
 </body>
+<!-- To import Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Data for illustation
+    const xValues = ['January', 'February', 'March', 'April', 'May', 'June'];
+    const yValues = [65, 59, 80, 81, 56, 55];
+    const data = {
+        labels: xValues,
+        datasets: [{
+            label: 'My First Dataset',
+            data: yValues,
+            fill: false, // Set to true to fill the area under the line
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1 // Smoothness of the line
+        }]
+    };
+    const options = {
+        scales: {
+            y: {
+                beginAtZero: true // Start the y-axis at zero
+            }
+        }
+    };
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'line',
+        data: data,
+        options: options
+    });
+</script>
 </html>
-
-
-
-
