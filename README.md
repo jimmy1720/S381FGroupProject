@@ -8,7 +8,7 @@
 - Abel (13032428) 
 - Ashwin-Sundar (13139477)
 - Thomas (13035781)
-- Jimmy ([Student 5 SID])
+- Jimmy (13030411)
 
 ## 2. Project File Structure
 
