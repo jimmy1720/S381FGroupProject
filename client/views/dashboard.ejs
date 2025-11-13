@@ -41,29 +41,86 @@
             else if (hours >= 12 && hours < 18) return 'afternoon'; // 12–5pm
             else if (hours >= 18 && hours < 24) return 'evening'; // 6–11pm
             else return 'night'; // 0–5am
-        } %>    
+        } %>
 
-        <h1>
-            Good <%= currentTimeForGreeting() %>, <%= properCase(user.username) %>
-        </h1><br>
-        <hr><br>
-        <h2>Total Income:</h2>
-        <p class="fs-5">111</p>
-        <h2>Total Expense:</h2>
-        <p class="fs-5">111</p>
-        <h2>Remaining Budget:</h2>
-        <p class="fs-5">111</p>
-        <div class="container">
-            <div class="row align-items-start">
-                <div class="col py-5">
-                    <h2>Line Chart</h2>
-                    <canvas id="myChart"></canvas>
-                </div>
-                <div class="col py-5">
-                    <h2>Pie Chart</h2>
-                    <canvas id="myPieChart"></canvas>
+        <div class="row">
+            <div class="col-12">
+                <div class="row">
+                    <!-- Greetings and Overview -->
+                    <div class="col-lg-8 col-md-8 col-12 mb-4">
+                        <div class="card p-4 h-100">
+                            <h2 class="card-title">Good <%= currentTimeForGreeting() %>, <%= properCase(user.username) %>.</h2>
+                            <p class="card-text">Here is a quick overview of your budget and expenses.</p>
+                            <div class="row text-center mt-3">
+                                <div class="col-md-4 mb-2">
+                                    <div class="bg-light p-3 rounded">
+                                        <h6 class="mb-1 text-success">Total Income</h6>
+                                        <div class="h4 m-0">111</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <div class="bg-light p-3 rounded">
+                                        <h6 class="mb-1 text-danger">Total Expense</h6>
+                                        <div class="h4 m-0">111</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <div class="bg-light p-3 rounded">
+                                        <h6 class="mb-1 text-primary">Remaining Budget</h6>
+                                        <div class="h4 m-0">111</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-4">
+                                <canvas id="myChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4 col-md-4 col-12 mb-4 d-grid gap-4">
+                        <!-- Line Chart of Expenses-->
+                        <div class="card p-4 h-100">
+                            <h3 class="card-title">Monthly Expense Ratio</h3>
+                            <canvas id="myPieChart"></canvas>
+                        </div>
+
+                        <div class="card p-4 h-100">
+                            <h2 class="card-title mb-3">Tasks</h2>
+                            <div class="d-grid gap-1">
+                                <button class="btn btn-success mb-2" onclick="location.href='/add-transaction'">
+                                    <i class="bi bi-plus-circle"></i> Add Transaction</button>
+                                <button class="btn btn-secondary mb-2" onclick="location.href='/recent-transactions'">
+                                    <i class="bi bi-clock-history"></i> View Recent Transactions</button>
+                            </div>
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
+        </div>
+
+                <div class="row">
+                    <div class="col-lg-6 col-md-6 col-12 mb-4">
+                        <div class="card p-4 h-100">
+                            <h2 class="card-title">Transaction Records</h2>
+                            <p class="card-text">Records.</p>
+                        </div>
+                    </div>
+        
+                    <div class="col-lg-6 col-md-6 col-12 mb-4">
+                        <div class="card p-4 h-100">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        
+
+        <div class="container">
+            <div class="row align-items-start">
+                
+                
         </div>
     </main>
     <footer class="text-center py-4">
@@ -72,53 +129,79 @@
 </body>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const xValues = ['January', 'February', 'March', 'April', 'May', 'June'];
-    const yValues = [65, 59, 80, 81, 56, 55];
-    const data = {
-        // labels: xValues,
-        labels: <%= line_graph_x =>,
-        datasets: [{
-            label: 'My First Dataset',
-            // data: yValues,
-            data: <%= line_graph_y =>,
-            fill: false, // Set to true to fill the area under the line
-            borderColor: 'rgb(75, 192, 192)',
-            tension: 0.1 // Smoothness of the line
-        }]
-    };
-    const options = {
-        scales: {
-            y: {
-                beginAtZero: true // Start the y-axis at zero
-            }
-        }
-    };
-    const ctx = document.getElementById('myChart').getContext('2d');
-    const myChart = new Chart(ctx, {
-        type: 'line',
-        data: data,
-        options: options
-    });
-    const pieData = {
-        // labels: ['Income', 'Expense'],
-        labels: <%= pie_chart_x =>,
-        datasets: [{
-            label: 'My First Dataset',
-            // data: [300, 50],
-            data: <%=pie_chart_y =>,
-            backgroundColor: [
-                'rgb(54, 162, 235)',
-                'rgb(255, 99, 132)'
-            ],
-            hoverOffset: 4
-        }]
-    };
-    const pieCtx = document.getElementById('myPieChart').getContext('2d');
-    const myPieChart = new Chart(pieCtx, {
-        type: 'pie',
-        data: pieData
-    });
-</script>
+  const currentMonth = new Date().getMonth(); // 0-11
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const xValues = Array.from({length: 12}, (_, i) => monthNames[(currentMonth + 1 + i) % 12]);
 
+  const expenseValues      = [65, 59, 80, 81, 56, 55, 30, 40, 70, 60, 50, 45];   
+  const incomeValues       = [120, 130, 110, 140, 125, 115, 135, 145, 150, 160, 155, 165];
+
+  const lineData = {
+    labels: xValues,
+    datasets: [
+      {
+        label: 'Expenses',
+        data: expenseValues,
+        fill: false,
+        borderColor: 'rgb(255, 99, 132)',   // red-ish
+        backgroundColor: 'rgba(255, 99, 132, 0.1)',
+        tension: 0.2
+      },
+      {
+        label: 'Income',
+        data: incomeValues,
+        fill: false,
+        borderColor: 'rgb(75, 192, 192)',    // blue-ish 
+        backgroundColor: 'rgba(75, 192, 192, 0.1)',
+        tension: 0.2
+      }
+    ]
+  };
+
+  const lineOptions = {
+    responsive: true,
+    plugins: {
+      legend: { position: 'top' },
+      title: {
+        display: true,
+        text: 'Monthly Income & Expenses'
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: { display: true, text: 'Amount ($)' }
+      },
+      x: {
+        title: { display: true, text: 'Month' }
+      }
+    }
+  };
+
+  const lineCtx = document.getElementById('myChart').getContext('2d');
+  const myLineChart = new Chart(lineCtx, {
+    type: 'line',
+    data: lineData,
+    options: lineOptions
+  });
+
+  const pieData = {
+    labels: ['Income', 'Expense'],
+    datasets: [{
+      label: 'My First Dataset',
+      data: [300, 50],
+      backgroundColor: [
+        'rgb(75, 192, 192)',
+        'rgb(255, 99, 132)'
+      ],
+      hoverOffset: 4
+    }]
+  };
+  const pieCtx = document.getElementById('myPieChart').getContext('2d');
+  const myPieChart = new Chart(pieCtx, {
+    type: 'pie',
+    data: pieData
+  });
+</script>
 
 </html>
