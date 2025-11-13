@@ -168,7 +168,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/dashboard', isLoggedIn, (req, res) => {
-    res.render('dashboard', { user: req.user });
+    res.render('dashboard', { user: req.user, pie_chart_x:[], pie_chart_y:[], line_graph_x:[], line_graph_y:[] });
 });
 
 // 404 handler
@@ -196,5 +196,6 @@ const startServer = async () => {
         process.exit(1);
     }
 };
+
 
 startServer();
