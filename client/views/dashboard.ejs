@@ -75,10 +75,12 @@
     const xValues = ['January', 'February', 'March', 'April', 'May', 'June'];
     const yValues = [65, 59, 80, 81, 56, 55];
     const data = {
-        labels: xValues,
+        // labels: xValues,
+        labels: <%= line_graph_x =>,
         datasets: [{
             label: 'My First Dataset',
-            data: yValues,
+            // data: yValues,
+            data: <%= line_graph_y =>,
             fill: false, // Set to true to fill the area under the line
             borderColor: 'rgb(75, 192, 192)',
             tension: 0.1 // Smoothness of the line
@@ -98,10 +100,12 @@
         options: options
     });
     const pieData = {
-        labels: ['Income', 'Expense'],
+        // labels: ['Income', 'Expense'],
+        labels: <%= pie_chart_x =>,
         datasets: [{
             label: 'My First Dataset',
-            data: [300, 50],
+            // data: [300, 50],
+            data: <%=pie_chart_y =>,
             backgroundColor: [
                 'rgb(54, 162, 235)',
                 'rgb(255, 99, 132)'
@@ -115,5 +119,6 @@
         data: pieData
     });
 </script>
+
 
 </html>
