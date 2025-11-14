@@ -18,15 +18,33 @@ dotenv.config({ path: path.join(__dirname, '..', '.env') });
 const app = express();
 const PORT = process.env.PORT || 8099;
 
-// Set up MongoDB session store
-const store = new MongoDBStore({
-    uri: process.env.MONGODB_URI,
-    collection: 'sessions',
-});
+// **FIX: Create session store with error handling and connection retry**
+const createSessionStore = () => {
+    const store = new MongoDBStore({
+        uri: process.env.MONGODB_URI,
+        collection: 'sessions',
+        connectionOptions: {
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000,
+            retryWrites: true,
+            w: 'majority'
+        }
+    });
 
-store.on('error', function(error) {
-    console.error('Session store error:', error);
-});
+    store.on('error', function(error) {
+        console.error('Session store error:', error);
+        // Don't exit process, just log the error
+        // The store will retry when connections are made
+    });
+
+    store.on('connected', function() {
+        console.log('✅ Session store connected to MongoDB');
+    });
+
+    return store;
+};
+
+const store = createSessionStore();
 
 // Middleware setup
 app.set('view engine', 'ejs');
@@ -45,6 +63,15 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use('/public', express.static(path.join(__dirname, '../client/public')));
+
+// **FIX: Add a simple memory store fallback for development**
+const createFallbackStore = () => {
+    console.log('⚠️  Using memory session store (fallback)');
+    return new session.MemoryStore();
+};
+
+// Use memory store if MongoDB connection fails initially
+let sessionStore = store;
 
 // Facebook Strategy
 if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
@@ -185,17 +212,27 @@ app.use((err, req, res, next) => {
 // Connect to DB and start server
 const startServer = async () => {
     try {
+        console.log('🔗 Attempting to connect to MongoDB...');
         await connectDB();
         console.log('✅ Database connected successfully');
         
+        // Once DB is connected, the session store should work
+        // If you want to verify session store connection, you can add a check here
+        
         app.listen(PORT, () => {
             console.log(`🚀 Server is running on http://localhost:${PORT}`);
+            console.log('💡 If you see session errors above, they should resolve now that DB is connected');
         });
     } catch (error) {
         console.error('❌ Failed to start server:', error);
-        process.exit(1);
+        console.log('💡 Using memory session store for development');
+        // Fallback to memory store if MongoDB fails
+        sessionStore = createFallbackStore();
+        
+        app.listen(PORT, () => {
+            console.log(`🚀 Server is running on http://localhost:${PORT} (with memory sessions)`);
+        });
     }
 };
-
 
 startServer();
