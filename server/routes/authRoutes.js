@@ -3,6 +3,9 @@ const router = express.Router();
 const passport = require('passport');
 const { isLoggedIn } = require('../middleware/authMiddleware');
 const authController = require('../controllers/authController');
+const passwordController = require('../controllers/passwordController');
+const passwordController = require('../controllers/passwordController');
+
 
 // Render login page
 router.get("/login", (req, res) => {
@@ -11,6 +14,23 @@ router.get("/login", (req, res) => {
         message: null,
         showFacebook: !!process.env.FACEBOOK_APP_ID,
         showGoogle: !!process.env.GOOGLE_CLIENT_ID
+    });
+});
+
+// Render forgot password page
+router.get('/forgot-password', (req, res) => {
+    res.render('forgot-password', {
+        error: null,
+        message: null
+    });
+});
+
+// Render reset password page (accessed via email link with token)
+router.get('/reset-password/:token', (req, res) => {
+    res.render('reset-password', {
+        token: req.params.token,
+        error: null,
+        message: null
     });
 });
 
@@ -29,6 +49,12 @@ router.post('/login', authController.login);
 
 // Handle registration
 router.post('/register', authController.register);
+
+// Handle forgot password form submission
+router.post('/forgot-password', passwordController.forgotPassword);
+
+// Handle reset password form submission
+router.post('/reset-password', passwordController.resetPassword);
 
 // OAuth: Facebook
 if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {

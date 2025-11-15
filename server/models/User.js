@@ -50,6 +50,15 @@ const userSchema = new mongoose.Schema({
     created_at: {
         type: Date,
         default: Date.now
+    },
+    // Password reset fields
+    resetToken: {
+        type: String,
+        sparse: true // Token for password reset
+    },
+    resetTokenExpiry: {
+        type: Date,
+        sparse: true // Token expiration time
     }
 });
 

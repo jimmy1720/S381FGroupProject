@@ -2,10 +2,15 @@ const express = require('express');
 const session = require('express-session');
 const passport = require('passport');
 const MongoDBStore = require('connect-mongodb-session')(session);
-const connectDB = require('./config/db');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
 const path = require('path');
+const connectDB = require('./config/db');
+const authRoutes = require('./routes/authRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
+const transactionRoutes = require('./routes/transactionRoutes');
+const budgetRoutes = require('./routes/budgetRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 const { isLoggedIn, setupPassportSerialization } = require('./middleware/authMiddleware');
 const User = require('./models/User');
@@ -197,6 +202,13 @@ app.get('/', (req, res) => {
 app.get('/dashboard', isLoggedIn, (req, res) => {
     res.render('dashboard', { user: req.user, pie_chart_x:[], pie_chart_y:[], line_graph_x:[], line_graph_y:[] });
 });
+
+// Register routes
+app.use('/auth', authRoutes);                     // Authentication and password recovery
+app.use('/api/categories', categoryRoutes);       // Category CRUD
+app.use('/api/transactions', transactionRoutes);  // Transaction CRUD
+app.use('/api/budgets', budgetRoutes);           // Budget CRUD
+app.use('/api/dashboard', dashboardRoutes);      // Dashboard analytics
 
 // 404 handler
 app.use((req, res) => {

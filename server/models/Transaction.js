@@ -25,6 +25,11 @@ const transactionSchema = new mongoose.Schema({
         type: String,
         trim: true,
         maxlength: 255 // Optional description of the transaction
+    },
+    date: {
+        type: Date,
+        default: Date.now, // Transaction date
+        required: true
     }
 }, { timestamps: true }); // Automatically manage createdAt and updatedAt
 
