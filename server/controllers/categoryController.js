@@ -29,13 +29,8 @@ async function createCategory(req, res) {
 // Get all categories for current user
 async function getCategories(req, res) {
     try {
-        const { type } = req.query;
-        const filter = { userId: req.user.id };
-        
-        // Optional filter by type (expense/income)
-        if (type) filter.type = type;
-
-        const categories = await BudgetCategory.find(filter);
+        // Return all categories (no type filter needed)
+        const categories = await BudgetCategory.find({ userId: req.user.id });
         res.json(categories);
     } catch (err) {
         console.error('Get categories error:', err);
