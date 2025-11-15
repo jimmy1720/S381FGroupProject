@@ -26,7 +26,7 @@
             </div>
         </nav>
     </header>
-    <main class="container my-5">
+    <main class="container mt-5">
         <% function properCase(name) {
             return String(name).trim().split(/\s+/).map(function(word) {
                 if (word === '-' || word === "'") return word;
@@ -42,6 +42,27 @@
             else if (hours >= 18 && hours < 24) return 'evening'; // 6–11pm
             else return 'night'; // 0–5am
         } %>
+
+        <!-- Modal for Add Transaction and Category -->
+        <div class="modal fade" id="addTransaction" tabindex="-1" role="dialog" aria-labelledby="addTransactionModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addTransactionModalLabel">Add Transaction</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    ...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+                </div>
+            </div>
+        </div>
 
         <div class="row">
             <div class="col-12">
@@ -87,10 +108,10 @@
                         <div class="card p-4 h-100">
                             <h2 class="card-title mb-3">Tasks</h2>
                             <div class="d-grid gap-1">
-                                <button class="btn btn-success mb-2" onclick="location.href='/add-transaction'">
+                                <button class="btn btn-success mb-2" data-toggle="modal" data-target="">
                                     <i class="bi bi-plus-circle"></i> Add Transaction</button>
-                                <button class="btn btn-secondary mb-2" onclick="location.href='/recent-transactions'">
-                                    <i class="bi bi-clock-history"></i> View Recent Transactions</button>
+                                <button class="btn btn-secondary mb-2" onclick="location.href='#'">
+                                    <i class="bi bi-plus-circle"></i> Add Category</button>
                             </div>
                         </div>
                     </div>
@@ -102,32 +123,107 @@
                 <div class="row">
                     <div class="col-lg-6 col-md-6 col-12 mb-4">
                         <div class="card p-4 h-100">
-                            <h2 class="card-title">Transaction Records</h2>
-                            <p class="card-text">Records.</p>
+                            <h2 class="card-title">Recent Transactions</h2>
+                            <div class="list-group mt-3">
+                                <!-- Sample Transaction Item -->
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="d-flex">
+                                        <div class="d-grid">
+                                            <div class="d-flex">
+                                                <span class="font-weight-bold me-3">Transportation</span>
+                                                <span class="text-muted">MTR</span>
+                                            </div>
+                                            <div class="row">
+                                                <span class="text-muted">11/13/2025</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="text-danger font-weight-bold">-15$</span>
+                                </div>
+
+                                <!-- Sample Transaction Item -->
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="d-flex">
+                                        <div class="d-grid">
+                                            <div class="d-flex">
+                                                <span class="font-weight-bold me-3">Groceries</span>
+                                                <span class="text-muted">Supermarket</span>
+                                            </div>
+                                            <div class="row">
+                                                <span class="text-muted">11/12/2025</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="text-danger font-weight-bold">-400$</span>
+                                </div>
+
+                                <!-- Sample Transaction Item -->
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="d-flex">
+                                        <div class="d-grid">
+                                            <div class="d-flex">
+                                                <span class="font-weight-bold me-3">Salary</span>
+                                                <span class="text-muted"></span>
+                                            </div>
+                                            <div class="row">
+                                                <span class="text-muted">11/12/2025</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="text-success font-weight-bold">18400$</span>
+                                </div>
+
+                                <!-- More transaction items can be added here -->
+                                
+                            </div>
+                            <p class="mt-3 text-end mb-0"><a href="#" class="text-decoration-none">View All Transactions &rarr;</a></p>
                         </div>
                     </div>
         
                     <div class="col-lg-6 col-md-6 col-12 mb-4">
                         <div class="card p-4 h-100">
+                            <h2 class="card-title">Spendings</h2>
+                            <div class="row h-100">
+                                <div class="col-md-4 mb-2">
+                                    <div class="bg-danger p-3 rounded h-100">
+                                        <div class="d-flex flex-column justify-content-center h-100 text-white">
+                                            <h6 class="mb-1">Groceries</h6>
+                                            <div class="h4">$400</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <div class="bg-primary p-3 rounded h-100">
+                                        <div class="d-flex flex-column justify-content-center h-100 text-white">
+                                            <h6 class="mb-1">Groceries</h6>
+                                            <div class="h4">$400</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <div class="bg-success p-3 rounded h-100">
+                                        <div class="d-flex flex-column justify-content-center h-100 text-white">
+                                            <h6 class="mb-1">Transportation</h6>
+                                            <div class="h4">$50</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        
-        
 
-        <div class="container">
-            <div class="row align-items-start">
-                
-                
-        </div>
+        
     </main>
     <footer class="text-center py-4">
+        <p><a href="#" class="text-decoration-none">Privacy Policy</a> | <a href="#" class="text-decoration-none">Terms of Service</a> | <a href="#" class="text-decoration-none">Contact</a></p>
         <p>&copy; 2025 Budget Tracker. All rights reserved.</p>
     </footer>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 <script>
   const currentMonth = new Date().getMonth(); // 0-11
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
