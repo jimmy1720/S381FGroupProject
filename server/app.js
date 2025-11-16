@@ -190,8 +190,6 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 // Passport Middleware Serialization
 setupPassportSerialization(passport);
 
-// Import routes
-const authRoutes = require('./routes/authRoutes');
 app.use('/', authRoutes);
 
 // Routes

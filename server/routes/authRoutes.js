@@ -4,7 +4,7 @@ const passport = require('passport');
 const { isLoggedIn } = require('../middleware/authMiddleware');
 const authController = require('../controllers/authController');
 const passwordController = require('../controllers/passwordController');
-const passwordController = require('../controllers/passwordController');
+
 
 
 // Render login page
