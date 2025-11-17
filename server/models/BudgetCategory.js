@@ -17,12 +17,8 @@ const budgetCategorySchema = new mongoose.Schema({
         type: Number,
         default: 0,
         min: 0 // Ensure budgetLimit is non-negative
-    },
-    type: {
-        type: String,
-        enum: ['expense', 'income'], // Category type
-        default: 'expense'
     }
+    
 }, { timestamps: true }); // Automatically manage createdAt and updatedAt
 
 // Explicitly specify the collection name as "budgetCategories"

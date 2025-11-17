@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Transaction = require('../models/Transaction');
 const Budget = require('../models/Budget');
+const BudgetCategory = require('../models/BudgetCategory')
 
 // Get dashboard summary with budget tracking
 async function getDashboard(req, res) {
@@ -36,6 +37,40 @@ async function getDashboard(req, res) {
             { $group: { _id: null, totalExpenses: { $sum: '$amount' } } }
         ]);
 
+        // Aggregate by category (both income and expense)
+        const categoryBreakdown = await Transaction.aggregate([
+            { 
+                $match: { 
+                    userId: new mongoose.Types.ObjectId(userId), 
+                    date: { $gte: startDate, $lte: endDate } 
+                } 
+            },
+            { 
+                $group: { 
+                    _id: { categoryId: '$categoryId', type: '$type' },
+                    total: { $sum: '$amount' },
+                    count: { $sum: 1 }
+                } 
+            },
+            {
+                $lookup: {
+                    from: 'budgetCategories',
+                    localField: '_id.categoryId',
+                    foreignField: '_id',
+                    as: 'category'
+                }
+            },
+            { $unwind: '$category' },
+            {
+                $project: {
+                    categoryName: '$category.name',
+                    type: '$_id.type',
+                    total: 1,
+                    count: 1
+                }
+            }
+        ]);
+
         const totalIncome = incomeAgg[0]?.totalIncome || 0;
         const totalExpenses = expensesAgg[0]?.totalExpenses || 0;
         const netSavings = totalIncome - totalExpenses;
@@ -50,7 +85,7 @@ async function getDashboard(req, res) {
                     $match: { 
                         userId: new mongoose.Types.ObjectId(userId), 
                         categoryId: budget.categoryId._id, 
-                        type: 'expense', 
+                        type: 'expense', // Only count expenses against budget
                         date: { $gte: budget.startDate } 
                     } 
                 },
@@ -60,13 +95,14 @@ async function getDashboard(req, res) {
             const spent = spentAgg[0]?.spent || 0;
             return { 
                 ...budget.toObject(), 
-                spent, // How much spent
-                remaining: budget.amount - spent // How much left
+                spent,
+                remaining: budget.amount - spent
             };
         }));
 
         res.json({
             summary: { totalIncome, totalExpenses, netSavings },
+            categoryBreakdown, // Shows income/expense per category
             budgets: budgetsWithSpent
         });
     } catch (err) {
