@@ -94,6 +94,24 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     console.log('⚠️  Google OAuth not configured - missing environment variables');
 }
 
+// Profile page (protected) — pass query flags so template can show alerts
+router.get('/profile', isLoggedIn, (req, res) => {
+    res.render('profile', { user: req.user, updated: !!req.query.updated, error: req.query.error || null });
+});
+
+// Settings page (protected) — pass query flags so template can show alerts
+router.get('/settings', isLoggedIn, (req, res) => {
+    res.render('settings', { user: req.user, updated: !!req.query.updated, error: req.query.error || null });
+});
+
+// Handle profile update (supports form post and AJAX)
+router.post('/update-profile', isLoggedIn, express.urlencoded({ extended: true }), authController.updateProfile);
+router.post('/api/update-profile', isLoggedIn, express.json(), authController.updateProfile);
+
+// Handle settings update (supports form post and AJAX)
+router.post('/update-settings', isLoggedIn, express.urlencoded({ extended: true }), authController.updateSettings);
+router.post('/api/update-settings', isLoggedIn, express.json(), authController.updateSettings);
+
 // Logout route
 router.get("/logout", (req, res, next) => {
     req.logout((err) => {
@@ -106,22 +124,18 @@ router.get("/logout", (req, res, next) => {
 
 // User Info
 router.get('/user/info', isLoggedIn, (req, res) => {
+    const providers = [];
+    if (!req.user || (!req.user.googleId && !req.user.facebookId && req.user.type === 'local')) providers.push('local');
+    if (req.user?.googleId) providers.push('google');
+    if (req.user?.facebookId) providers.push('facebook');
+    if (providers.length === 0) providers.push(req.user?.type || 'local');
+
     res.json({
         id: req.user.id,
-        name: req.user.username,
+        username: req.user.username,
         email: req.user.email,
-        type: req.user.type
+        providers
     });
-});
-
-// Profile page (protected)
-router.get('/profile', isLoggedIn, (req, res) => {
-    res.render('profile', { user: req.user });
-});
-
-// Settings page (protected)
-router.get('/settings', isLoggedIn, (req, res) => {
-    res.render('settings', { user: req.user });
 });
 
 module.exports = router;

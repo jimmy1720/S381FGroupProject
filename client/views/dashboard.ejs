@@ -8,33 +8,59 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        .spending-card {
+            transition: transform 0.2s;
+        }
+        .spending-card:hover {
+            transform: translateY(-2px);
+        }
+        .transaction-item {
+            border-left: 4px solid transparent;
+        }
+        .transaction-item.income {
+            border-left-color: #28a745;
+        }
+        .transaction-item.expense {
+            border-left-color: #dc3545;
+        }
+    </style>
 </head>
 
 <body>
     <!-- Header: add Profile & Settings buttons -->
-<header>
-	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-		<div class="container">
-			<a class="navbar-brand" href="#">Budget Tracker</a>
-			<button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="#">Budget Tracker</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                     data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-			<div class="d-flex align-items-center">
-				<a href="/profile" class="btn btn-outline-light btn-sm me-2" title="Profile">
-					<i class="bi bi-person-circle"></i>
-				</a>
-				<a href="/settings" class="btn btn-outline-light btn-sm me-2" title="Settings">
-					<i class="bi bi-gear"></i>
-				</a>
-				<button onclick="location.href='/'" class="btn btn-outline-light btn-sm">Logout</button>
-			</div>
-		</div>
-	</nav>
-</header>
+                <div class="d-flex align-items-center">
+                    <a href="/profile" class="btn btn-outline-light btn-sm me-2" title="Profile">
+                        <i class="bi bi-person-circle"></i>
+                    </a>
+                    <a href="/settings" class="btn btn-outline-light btn-sm me-2" title="Settings">
+                        <i class="bi bi-gear"></i>
+                    </a>
+                    <button onclick="location.href='/'" class="btn btn-outline-light btn-sm">Logout</button>
+                </div>
+            </div>
+        </nav>
+    </header>
 
-    <main class="container mt-5">
+    <main class="container mt-4">
         <% function properCase(name) {
             return String(name).trim().split(/\s+/).map(function(word) {
                 if (word === '-' || word === "'") return word;
@@ -60,7 +86,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body p-3">
-                <div class="mb-2">
+                <div class="mb-3">
                   <label class="form-label">Type</label>
                   <select id="txType" class="form-select" required>
                     <option value="expense">Expense</option>
@@ -68,29 +94,28 @@
                   </select>
                 </div>
 
-                <div class="mb-2">
+                <div class="mb-3">
                   <label class="form-label">Category</label>
-                  <!-- input + datalist so user can type new or pick existing -->
                   <input id="txCategory" list="txCategoryList" class="form-control" placeholder="Select or type a category" required />
                   <datalist id="txCategoryList"></datalist>
                   <small class="form-text text-muted">Choose existing or type new and press Enter</small>
                 </div>
 
-                <div class="mb-2">
+                <div class="mb-3">
                   <label class="form-label">Category limit (optional)</label>
                   <input id="txCategoryLimit" type="number" step="0.01" min="0" class="form-control" placeholder="Set spending limit for this category (optional)" />
                   <small class="form-text text-muted">This will set or update the budget limit for the chosen category.</small>
                 </div>
 
-                <div class="mb-2">
+                <div class="mb-3">
                   <label class="form-label">Amount</label>
                   <input id="txAmount" type="number" step="0.01" class="form-control" required />
                 </div>
-                <div class="mb-2">
+                <div class="mb-3">
                   <label class="form-label">Description</label>
                   <input id="txDesc" type="text" class="form-control" />
                 </div>
-                <div class="mb-2">
+                <div class="mb-3">
                   <label class="form-label">Date</label>
                   <input id="txDate" type="date" class="form-control" />
                 </div>
@@ -103,53 +128,69 @@
           </div>
         </div>
 
-        <div class="row">
-            <div class="col-12">
-                <div class="row">
-                    <!-- Greetings and Overview -->
-                    <div class="col-lg-8 col-md-8 col-12 mb-4">
-                        <div class="card p-4 h-100">
-                            <h2 class="card-title">Good <%= currentTimeForGreeting() %>, <%= properCase(user.username) %>.</h2>
-                            <p class="card-text">Here is a quick overview of your budget and expenses.</p>
-                            <div class="row text-center mt-3">
-                                <div class="col-md-4 mb-2">
-                                    <div class="bg-light p-3 rounded">
-                                        <h6 class="mb-1 text-success">Total Income</h6>
-                                        <div id="totalIncome" class="h4 m-0">0</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 mb-2">
-                                    <div class="bg-light p-3 rounded">
-                                        <h6 class="mb-1 text-danger">Total Expense</h6>
-                                        <div id="totalExpense" class="h4 m-0">0</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 mb-2">
-                                    <div class="bg-light p-3 rounded">
-                                        <h6 class="mb-1 text-primary">Remaining Budget</h6>
-                                        <div id="remainingBudget" class="h4 m-0">0</div>
-                                    </div>
-                                </div>
+        <div class="row g-3">
+            <!-- Greetings and Overview -->
+            <div class="col-lg-8 col-md-7">
+                <div class="card p-4 h-100">
+                    <% 
+                      // Prefer displayName for greeting; show username in parens when different
+                      const displayName = (user && user.displayName) ? user.displayName : (user && user.username) || '';
+                      const showUsername = user && user.displayName && user.username && user.displayName.toLowerCase() !== user.username.toLowerCase();
+                    %>
+                    <h2 class="card-title h4">Good <%= currentTimeForGreeting() %>, <%= properCase(displayName) %><%= showUsername ? ' (' + user.username + ')' : '' %>.</h2>
+                    <p class="card-text text-muted">Here is a quick overview of your budget and expenses.</p>
+                    <div class="row text-center mt-3 g-2">
+                        <div class="col-md-4">
+                            <div class="bg-light p-3 rounded border">
+                                <h6 class="mb-1 text-success">Total Income</h6>
+                                <div id="totalIncome" class="h4 m-0">0</div>
                             </div>
-                            <div class="row mt-4">
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light p-3 rounded border">
+                                <h6 class="mb-1 text-danger">Total Expense</h6>
+                                <div id="totalExpense" class="h4 m-0">0</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light p-3 rounded border">
+                                <h6 class="mb-1 text-primary">Remaining Budget</h6>
+                                <div id="remainingBudget" class="h4 m-0">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="chart-container">
                                 <canvas id="myChart"></canvas>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="col-lg-4 col-md-4 col-12 mb-4 d-grid gap-4">
-                        <!-- Pie chart -->
-                        <div class="card p-4 h-100">
-                            <h3 class="card-title">Monthly Expense Ratio</h3>
-                            <canvas id="myPieChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-5">
+                <div class="row g-3">
+                    <!-- Pie chart -->
+                    <div class="col-12">
+                        <div class="card p-3">
+                            <h3 class="card-title h5 mb-3">Monthly Expense Ratio</h3>
+                            <div class="chart-container">
+                                <canvas id="myPieChart"></canvas>
+                            </div>
                         </div>
+                    </div>
 
-                        <div class="card p-4 h-100">
-                            <h2 class="card-title mb-3">Tasks</h2>
-                            <div class="d-grid gap-1">
-                                <button class="btn btn-success mb-2" data-bs-toggle="modal" data-bs-target="#addTransaction" id="openAddTxBtn">
+                    <div class="col-12">
+                        <div class="card p-3">
+                            <h2 class="card-title h5 mb-3">Quick Actions</h2>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addTransaction" id="openAddTxBtn">
                                     <i class="bi bi-plus-circle"></i> Add Transaction
                                 </button>
+                                <button id="refreshBtn" class="btn btn-outline-primary">
+                                    <i class="bi bi-arrow-clockwise"></i> Refresh Data
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -157,524 +198,689 @@
             </div>
         </div>
 
-                <div class="row">
-                    <div class="col-lg-6 col-md-6 col-12 mb-4">
-                        <div class="card p-4 h-100">
-                            <h2 class="card-title">Recent Transactions</h2>
-                            <div class="d-flex justify-content-between align-items-center">
-                              <div>
-                                <button id="refreshBtn" class="btn btn-sm btn-outline-secondary me-2" title="Refresh transactions">
-                                  <i class="bi bi-arrow-clockwise"></i> Refresh
-                                </button>
-                                <!-- Auto-refresh toggle -->
-                                <button id="autoRefreshBtn" class="btn btn-sm btn-outline-info" title="Toggle auto-refresh">
-                                  <i id="autoRefreshIcon" class="bi bi-play-fill"></i> Auto
-                                </button>
-                              </div>
-                            </div>
-
-                            <div class="list-group mt-3" id="transactionsList">
-                                <!-- dynamic transaction items injected by JS -->
-                            </div>
-
-                            <p class="mt-3 text-end mb-0"><a href="#" class="text-decoration-none">View All Transactions &rarr;</a></p>
+        <div class="row mt-3 g-3">
+            <div class="col-lg-6 col-md-6">
+                <div class="card p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="card-title h5 mb-0">Recent Transactions</h2>
+                        <div>
+                            <button id="autoRefreshBtn" class="btn btn-sm btn-outline-info" title="Toggle auto-refresh">
+                                <i id="autoRefreshIcon" class="bi bi-pause-fill"></i> Auto
+                            </button>
                         </div>
                     </div>
-        
-                    <div class="col-lg-6 col-md-6 col-12 mb-4">
-                        <div class="card p-4 h-100">
-                            <h2 class="card-title">Spendings</h2>
-                            <div id="spendingsGrid" class="row h-100">
-                                <!-- dynamic budget/category cards injected by JS -->
-                            </div>
+
+                    <div class="list-group list-group-flush" id="transactionsList">
+                        <!-- dynamic transaction items injected by JS -->
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-arrow-repeat bi-spin" style="font-size: 1.5rem;"></i>
+                            <p class="mt-2 mb-0">Loading transactions...</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 text-end">
+                        <a href="#" class="text-decoration-none">View All Transactions &rarr;</a>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="col-lg-6 col-md-6">
+                <div class="card p-4 h-100">
+                    <h2 class="card-title h5 mb-3">Spendings by Category</h2>
+                    <div id="spendingsGrid" class="row g-2">
+                        <!-- dynamic budget/category cards injected by JS -->
+                        <div class="col-12 text-center py-4 text-muted">
+                            <i class="bi bi-pie-chart" style="font-size: 1.5rem;"></i>
+                            <p class="mt-2 mb-0">Loading spending data...</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        
     </main>
-    <footer class="text-center py-4">
-        <p><a href="#" class="text-decoration-none">Privacy Policy</a> | <a href="#" class="text-decoration-none">Terms of Service</a> | <a href="#" class="text-decoration-none">Contact</a></p>
-        <p>&copy; 2025 Budget Tracker. All rights reserved.</p>
+
+    <footer class="mt-5 py-4 bg-light">
+        <div class="container">
+            <div class="text-center">
+                <p class="mb-2">
+                    <a href="#" class="text-decoration-none me-3">Privacy Policy</a> 
+                    <a href="#" class="text-decoration-none me-3">Terms of Service</a> 
+                    <a href="#" class="text-decoration-none">Contact</a>
+                </p>
+                <p class="mb-0">&copy; 2025 Budget Tracker. All rights reserved.</p>
+            </div>
+        </div>
     </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script>
-  const currentMonth = new Date().getMonth(); // 0-11
-  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  const xValues = Array.from({length: 12}, (_, i) => monthNames[(currentMonth + 1 + i) % 12]);
+        // Chart initialization with better configuration
+        let myLineChart, myPieChart;
 
-  // initial placeholders (will be updated by loadTransactions)
-  let expenseValues = new Array(12).fill(0);
-  let incomeValues = new Array(12).fill(0);
-
-  const lineData = {
-    labels: xValues,
-    datasets: [
-      {
-        label: 'Expenses',
-        data: expenseValues,
-        fill: false,
-        borderColor: 'rgb(255, 99, 132)',
-        backgroundColor: 'rgba(255, 99, 132, 0.1)',
-        tension: 0.2
-      },
-      {
-        label: 'Income',
-        data: incomeValues,
-        fill: false,
-        borderColor: 'rgb(75, 192, 192)',
-        backgroundColor: 'rgba(75, 192, 192, 0.1)',
-        tension: 0.2
-      }
-    ]
-  };
-
-  const lineOptions = {
-    responsive: true,
-    plugins: {
-      legend: { position: 'top' },
-      title: { display: true, text: 'Monthly Income & Expenses' }
-    },
-    scales: {
-      y: { beginAtZero: true, title: { display: true, text: 'Amount ($)' } },
-      x: { title: { display: true, text: 'Month' } }
-    }
-  };
-
-  const lineCtx = document.getElementById('myChart').getContext('2d');
-  const myLineChart = new Chart(lineCtx, { type: 'line', data: lineData, options: lineOptions });
-
-  const pieData = {
-    labels: ['Income', 'Expense'],
-    datasets: [{ label: 'Totals', data: [0, 0], backgroundColor: ['rgb(75, 192, 192)', 'rgb(255, 99, 132)'], hoverOffset: 4 }]
-  };
-  const pieCtx = document.getElementById('myPieChart').getContext('2d');
-  const myPieChart = new Chart(pieCtx, { type: 'pie', data: pieData });
-
-  /* load categories: preserve user-typed value if possible */
-async function loadCategories(kind) {
-  try {
-    const res = await fetch(`/api/categories?kind=${encodeURIComponent(kind)}`);
-    if (!res.ok) return;
-    const data = await res.json();
-    const dataList = document.getElementById('txCategoryList');
-    const input = document.getElementById('txCategory');
-    const limitInput = document.getElementById('txCategoryLimit');
-    const previous = (input.value || '').trim();
-    const previousLimit = (limitInput && limitInput.value) ? limitInput.value : '';
-    dataList.innerHTML = '';
-
-    const names = Array.isArray(data.categories) ? data.categories.map(c => c.name) : [];
-    names.forEach(name => {
-      const opt = document.createElement('option');
-      opt.value = name;
-      dataList.appendChild(opt);
-    });
-
-    // Preserve previous if it exists or if it is one of the fetched names.
-    if (previous) {
-      // keep user input (even if not in list) so they don't lose typing
-      input.value = previous;
-      if (previousLimit) limitInput.value = previousLimit;
-    } else if (names.length > 0) {
-      input.value = names[0]; // default only when input empty
-      // If server returned a matching category, set its budgetLimit if available
-      const matched = data.categories.find(c => c.name === input.value);
-      if (matched && typeof matched.budgetLimit !== 'undefined' && limitInput) limitInput.value = matched.budgetLimit;
-    } else {
-      input.value = '';
-      if (limitInput) limitInput.value = '';
-    }
-  } catch (err) {
-    console.error('Failed to load categories', err);
-  }
-}
-
-/* load dashboard and augment with category limits map for spendings display */
-async function loadDashboardSummary() {
-  try {
-    const res = await fetch('/api/dashboard');
-    if (!res.ok) return;
-    const body = await res.json();
-    const summary = body.summary || {};
-    document.getElementById('totalIncome').textContent = (summary.totalIncome || 0).toFixed(2);
-    document.getElementById('totalExpense').textContent = (summary.totalExpenses || 0).toFixed(2);
-    document.getElementById('remainingBudget').textContent = (summary.netSavings || 0).toFixed(2);
-
-    // fetch user's expense categories to read budgetLimit
-    const catRes = await fetch('/api/categories?kind=expense');
-    const catData = catRes.ok ? await catRes.json() : { categories: [] };
-    const limitMap = {};
-    (catData.categories || []).forEach(c => limitMap[c.name] = c.budgetLimit || 0);
-
-    const grid = document.getElementById('spendingsGrid');
-    grid.innerHTML = '';
-
-    if (Array.isArray(body.budgets) && body.budgets.length) {
-      body.budgets.slice(0,6).forEach(b => {
-        const col = document.createElement('div');
-        col.className = 'col-md-6 mb-2';
-        const remaining = (b.amount || 0) - (b.spent || 0);
-        col.innerHTML = `
-          <div class="p-3 rounded h-100" style="background:#f1f5f9;">
-            <h6 class="mb-1">${b.categoryId?.name || 'Category'}</h6>
-            <div class="h4 mb-1">$${(b.spent || 0).toFixed(2)}</div>
-            <small class="text-muted">Budget: $${(b.amount || 0).toFixed(2)} • Remaining: $${(remaining).toFixed(2)}</small>
-          </div>
-        `;
-        grid.appendChild(col);
-      });
-    } else if (Array.isArray(body.categoryBreakdown) && body.categoryBreakdown.length) {
-      const expenses = body.categoryBreakdown.filter(c=>c.type==='expense').sort((a,b)=>b.total-a.total).slice(0,6);
-      expenses.forEach(e => {
-        const limit = limitMap[e.categoryName] || 0;
-        const col = document.createElement('div');
-        col.className = 'col-md-6 mb-2';
-        col.innerHTML = `
-          <div class="p-3 rounded h-100" style="background:#fef2f2;">
-            <h6 class="mb-1">${e.categoryName}</h6>
-            <div class="h4 mb-1">$${(e.total || 0).toFixed(2)}</div>
-            <small class="text-muted">${e.count || 0} transactions${limit ? ' • Limit: $' + limit.toFixed(2) : ''}</small>
-          </div>
-        `;
-        grid.appendChild(col);
-      });
-    } else {
-      grid.innerHTML = '<div class="col-12 text-muted">No spending data yet</div>';
-    }
-  } catch (err) {
-    console.error('loadDashboardSummary error', err);
-  }
-}
-
-/* modal open: prefill date and preserve category by default */
-document.addEventListener('DOMContentLoaded', () => {
-  const typeSelect = document.getElementById('txType');
-  typeSelect.addEventListener('change', () => loadCategories(typeSelect.value));
-
-  // When opening the Add Transaction modal, prefill date and keep current category if any
-  const openBtn = document.getElementById('openAddTxBtn');
-  if (openBtn) {
-    openBtn.addEventListener('click', () => {
-      const dateInput = document.getElementById('txDate');
-      const today = new Date().toISOString().slice(0,10);
-      if (!dateInput.value) dateInput.value = today;
-      // ensure categories are loaded for selected kind without overwriting user-typed value
-      loadCategories(document.getElementById('txType').value);
-      // remove any edit id when creating new
-      const form = document.getElementById('txForm');
-      form.removeAttribute('data-tx-id');
-      // clear category limit for new tx by default
-      const limitInput = document.getElementById('txCategoryLimit');
-      if (limitInput) limitInput.value = '';
-    });
-  }
-
-  // keep txCategory value across modal hide (do not wipe user selection)
-  document.getElementById('addTransaction').addEventListener('hidden.bs.modal', () => {
-    const form = document.getElementById('txForm');
-    // preserve category value
-    const categoryInput = document.getElementById('txCategory');
-    const preserved = categoryInput.value;
-    const limitInput = document.getElementById('txCategoryLimit');
-    const preservedLimit = limitInput ? limitInput.value : '';
-    form.removeAttribute('data-tx-id');
-    form.reset();
-    categoryInput.value = preserved; // put back the category text
-    if (limitInput) limitInput.value = preservedLimit;
-    // reload categories for selected type
-    loadCategories(document.getElementById('txType').value);
-  });
-
-    // initial loads
-    loadCategories(typeSelect.value);
-    loadTransactions();
-    loadDashboardSummary();
-
-    document.getElementById('txForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const form = e.currentTarget;
-      const txId = form.dataset.txId;
-      const payload = {
-        categoryName: document.getElementById('txCategory').value,
-        budgetLimit: parseFloat(document.getElementById('txCategoryLimit').value) || undefined,
-        type: document.getElementById('txType').value,
-        amount: parseFloat(document.getElementById('txAmount').value),
-        description: document.getElementById('txDesc').value,
-        date: document.getElementById('txDate').value
-      };
-
-      try {
-        let res;
-        if (txId) {
-          res = await fetch(`/api/transactions/${txId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-        } else {
-          res = await fetch('/api/transactions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-        }
-
-        if (res.ok) {
-          const modalEl = document.getElementById('addTransaction');
-          const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-          modal.hide();
-          form.removeAttribute('data-tx-id');
-          await loadCategories(payload.type);
-          await loadTransactions();
-          await loadDashboardSummary();
-        } else {
-          const json = await res.json().catch(()=>({message:'error'}));
-          alert('Error: ' + (json.message || json.error || 'Unable to save'));
-        }
-      } catch (err) {
-        console.error('Submit error', err);
-        alert('An error occurred while saving transaction');
-      }
-    });
-
-    // clear form dataset and reset on modal hide
-    document.getElementById('addTransaction').addEventListener('hidden.bs.modal', () => {
-      const form = document.getElementById('txForm');
-      form.removeAttribute('data-tx-id');
-      form.reset();
-      loadCategories(document.getElementById('txType').value);
-    });
-  });
-
-// update loadTransactions to show "no transactions" message and debug failures
-async function loadTransactions() {
-  try {
-    const res = await fetch('/api/transactions', { credentials: 'same-origin' });
-    if (!res.ok) {
-      console.warn('Failed to fetch /api/transactions, status:', res.status);
-      const listEl = document.getElementById('transactionsList');
-      listEl.innerHTML = '<div class="text-muted p-3">Unable to load transactions — are you logged in?</div>';
-      return;
-    }
-
-    const data = await res.json().catch(err => {
-      console.error('Failed to parse transactions JSON', err);
-      return null;
-    });
-    if (!data) {
-      document.getElementById('transactionsList').innerHTML = '<div class="text-muted p-3">No transactions available</div>';
-      return;
-    }
-
-    const txs = Array.isArray(data) ? data : (data.transactions || []);
-    const list = document.getElementById('transactionsList');
-    list.innerHTML = '';
-
-    if (!txs.length) {
-      list.innerHTML = '<div class="text-muted p-3">No transactions yet. Use "Add Transaction" to create one.</div>';
-      return;
-    }
-
-    txs.forEach(tx => {
-      const item = document.createElement('div');
-      item.className = 'list-group-item d-flex justify-content-between align-items-center';
-      const txId = tx._id || tx.id;
-      item.innerHTML = `
-        <div>
-          <div class="d-flex">
-            <span class="font-weight-bold me-3">${tx.categoryId?.name || 'Uncategorized'}</span>
-            <span class="text-muted">${tx.description || ''}</span>
-          </div>
-          <div class="row"><span class="text-muted">${new Date(tx.date).toLocaleDateString()}</span></div>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-          <span class="${tx.type === 'expense' ? 'text-danger' : 'text-success'} font-weight-bold me-2">
-            ${tx.type === 'expense' ? '-' : ''}${tx.amount}
-          </span>
-          <button class="btn btn-sm btn-outline-primary" data-action="edit" data-id="${txId}">Edit</button>
-          <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${txId}">Delete</button>
-        </div>
-      `;
-      list.appendChild(item);
-    });
-
-    // attach handlers (implemented)
-    list.querySelectorAll('button[data-action]').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        const action = btn.getAttribute('data-action');
-        const id = btn.getAttribute('data-id');
-
-        if (action === 'delete') {
-          if (!confirm('Delete this transaction?')) return;
-          try {
-            const del = await fetch(`/api/transactions/${id}`, {
-              method: 'DELETE',
-              credentials: 'same-origin'
+        function initializeCharts() {
+            const currentMonth = new Date().getMonth();
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            // Create labels for the next 12 months starting from current month
+            const xValues = Array.from({length: 12}, (_, i) => {
+                const monthIndex = (currentMonth + i) % 12;
+                return monthNames[monthIndex];
             });
-            if (del.ok) {
-              // refresh after delete
-              await loadTransactions();
-              await loadDashboardSummary();
-              await loadCategories(document.getElementById('txType').value);
-            } else {
-              const errBody = await del.json().catch(()=>({}));
-              alert('Failed to delete: ' + (errBody.error || del.statusText));
+
+            const lineCtx = document.getElementById('myChart').getContext('2d');
+            const pieCtx = document.getElementById('myPieChart').getContext('2d');
+
+            // Destroy existing charts if they exist
+            if (myLineChart) myLineChart.destroy();
+            if (myPieChart) myPieChart.destroy();
+
+            myLineChart = new Chart(lineCtx, {
+                type: 'line',
+                data: {
+                    labels: xValues,
+                    datasets: [
+                        {
+                            label: 'Expenses',
+                            data: new Array(12).fill(0),
+                            fill: false,
+                            borderColor: 'rgb(220, 53, 69)',
+                            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                            tension: 0.3,
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Income',
+                            data: new Array(12).fill(0),
+                            fill: false,
+                            borderColor: 'rgb(40, 167, 69)',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            tension: 0.3,
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 15
+                            }
+                        },
+                        title: { 
+                            display: true, 
+                            text: 'Monthly Income & Expenses',
+                            font: { size: 14 }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            title: { 
+                                display: true, 
+                                text: 'Amount ($)',
+                                font: { weight: 'bold' }
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value;
+                                }
+                            }
+                        },
+                        x: { 
+                            title: { 
+                                display: true, 
+                                text: 'Month',
+                                font: { weight: 'bold' }
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'nearest'
+                    }
+                }
+            });
+
+            myPieChart = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Income', 'Expense'],
+                    datasets: [{
+                        data: [0, 0],
+                        backgroundColor: [
+                            'rgba(40, 167, 69, 0.8)',
+                            'rgba(220, 53, 69, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgb(40, 167, 69)',
+                            'rgb(220, 53, 69)'
+                        ],
+                        borderWidth: 1,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 15
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                    return `${label}: $${value.toFixed(2)} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Load categories with preservation of user input
+        async function loadCategories(kind) {
+            try {
+                const res = await fetch(`/api/categories?kind=${encodeURIComponent(kind)}`);
+                if (!res.ok) return;
+                const data = await res.json();
+                const dataList = document.getElementById('txCategoryList');
+                const input = document.getElementById('txCategory');
+                const limitInput = document.getElementById('txCategoryLimit');
+                
+                // Store current values
+                const previous = (input.value || '').trim();
+                const previousLimit = (limitInput && limitInput.value) ? limitInput.value : '';
+                
+                // Clear and rebuild datalist
+                dataList.innerHTML = '';
+                const names = Array.isArray(data.categories) ? data.categories.map(c => c.name) : [];
+                names.forEach(name => {
+                    const opt = document.createElement('option');
+                    opt.value = name;
+                    dataList.appendChild(opt);
+                });
+
+                // Preserve user input or set default
+                if (previous) {
+                    input.value = previous;
+                    if (previousLimit) limitInput.value = previousLimit;
+                } else if (names.length > 0) {
+                    input.value = names[0];
+                    // Set limit if available for selected category
+                    const matched = data.categories.find(c => c.name === input.value);
+                    if (matched && typeof matched.budgetLimit !== 'undefined' && limitInput) {
+                        limitInput.value = matched.budgetLimit;
+                    }
+                } else {
+                    input.value = '';
+                    if (limitInput) limitInput.value = '';
+                }
+            } catch (err) {
+                console.error('Failed to load categories', err);
             }
-          } catch (err) {
-            console.error('Delete failed', err);
-            alert('Delete request failed. See console.');
-          }
-          return;
         }
 
-        if (action === 'edit') {
-          // find transaction in the loaded list
-          const tx = txs.find(t => (t._id || t.id) === id);
-          if (!tx) {
-            alert('Transaction not found in current view');
-            return;
-          }
-          // populate modal fields including category limit (if available)
-          document.getElementById('txType').value = tx.type || 'expense';
-          await loadCategories(document.getElementById('txType').value);
-          document.getElementById('txCategory').value = tx.categoryId?.name || '';
-          // try to set category limit if category has it
-          if (tx.categoryId && typeof tx.categoryId.budgetLimit !== 'undefined') {
-            const limitEl = document.getElementById('txCategoryLimit');
-            if (limitEl) limitEl.value = tx.categoryId.budgetLimit;
-          }
-          document.getElementById('txAmount').value = tx.amount;
-          document.getElementById('txDesc').value = tx.description || '';
-          document.getElementById('txDate').value = new Date(tx.date).toISOString().slice(0,10);
-          document.getElementById('txForm').dataset.txId = id;
-          const modal = new bootstrap.Modal(document.getElementById('addTransaction'));
-          modal.show();
+        // Load dashboard summary with category limits
+        async function loadDashboardSummary() {
+            try {
+                const res = await fetch('/api/dashboard');
+                if (!res.ok) return;
+                const body = await res.json();
+                const summary = body.summary || {};
+                
+                // Update summary cards
+                document.getElementById('totalIncome').textContent = (summary.totalIncome || 0).toFixed(2);
+                document.getElementById('totalExpense').textContent = (summary.totalExpenses || 0).toFixed(2);
+                document.getElementById('remainingBudget').textContent = (summary.netSavings || 0).toFixed(2);
+
+                // Load category limits for spending cards
+                const catRes = await fetch('/api/categories?kind=expense');
+                const catData = catRes.ok ? await catRes.json() : { categories: [] };
+                const limitMap = {};
+                (catData.categories || []).forEach(c => limitMap[c.name] = c.budgetLimit || 0);
+
+                // Update spendings grid
+                const grid = document.getElementById('spendingsGrid');
+                grid.innerHTML = '';
+
+                let spendingData = [];
+                
+                // Try different possible data structures from API
+                if (Array.isArray(body.budgets) && body.budgets.length) {
+                    spendingData = body.budgets.slice(0, 6);
+                } else if (Array.isArray(body.categoryBreakdown) && body.categoryBreakdown.length) {
+                    spendingData = body.categoryBreakdown
+                        .filter(c => c.type === 'expense')
+                        .sort((a, b) => b.total - a.total)
+                        .slice(0, 6);
+                }
+
+                if (spendingData.length === 0) {
+                    grid.innerHTML = `
+                        <div class="col-12 text-center py-4 text-muted">
+                            <i class="bi bi-info-circle" style="font-size: 1.5rem;"></i>
+                            <p class="mt-2 mb-0">No spending data available</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                spendingData.forEach(item => {
+                    const categoryName = item.categoryId?.name || item.categoryName || 'Uncategorized';
+                    const spent = item.spent || item.total || 0;
+                    const budget = item.amount || limitMap[categoryName] || 0;
+                    const remaining = budget - spent;
+                    const usagePercent = budget > 0 ? Math.min((spent / budget) * 100, 100) : 0;
+                    
+                    // Determine color based on usage
+                    let bgColor = '#f8f9fa';
+                    let textColor = '#6c757d';
+                    if (budget > 0) {
+                        if (usagePercent >= 90) {
+                            bgColor = '#f8d7da';
+                            textColor = '#721c24';
+                        } else if (usagePercent >= 75) {
+                            bgColor = '#fff3cd';
+                            textColor = '#856404';
+                        }
+                    }
+
+                    const col = document.createElement('div');
+                    col.className = 'col-md-6 col-lg-6';
+                    col.innerHTML = `
+                        <div class="p-3 rounded spending-card h-100" style="background:${bgColor}; color:${textColor}; border-left: 4px solid ${usagePercent >= 90 ? '#dc3545' : usagePercent >= 75 ? '#ffc107' : '#28a745'}">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="mb-0 fw-bold">${categoryName}</h6>
+                                <span class="badge bg-light text-dark">${usagePercent.toFixed(0)}%</span>
+                            </div>
+                            <div class="h5 mb-1">$${spent.toFixed(2)}</div>
+                            <div class="progress mb-2" style="height: 4px;">
+                                <div class="progress-bar ${usagePercent >= 90 ? 'bg-danger' : usagePercent >= 75 ? 'bg-warning' : 'bg-success'}" 
+                                     role="progressbar" style="width: ${usagePercent}%;" 
+                                     aria-valuenow="${usagePercent}" aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                            </div>
+                            <small class="text-muted d-block">
+                                ${budget > 0 ? `Budget: $${budget.toFixed(2)} • Remaining: $${remaining.toFixed(2)}` : 'No budget set'}
+                            </small>
+                        </div>
+                    `;
+                    grid.appendChild(col);
+                });
+            } catch (err) {
+                console.error('loadDashboardSummary error', err);
+                const grid = document.getElementById('spendingsGrid');
+                grid.innerHTML = `
+                    <div class="col-12 text-center py-4 text-muted">
+                        <i class="bi bi-exclamation-triangle" style="font-size: 1.5rem;"></i>
+                        <p class="mt-2 mb-0">Error loading spending data</p>
+                    </div>
+                `;
+            }
         }
-      });
-    });
 
-    // update charts (existing aggregation code)...
-    {
-      const incomeTotals = new Array(12).fill(0);
-      const expenseTotals = new Array(12).fill(0);
-      const labelMonths = xValues;
-      txs.forEach(tx => {
-        const date = tx.date ? new Date(tx.date) : new Date();
-        const monthName = monthNames[date.getMonth()];
-        const pos = labelMonths.indexOf(monthName);
-        if (pos === -1) return;
-        const amt = Number(tx.amount) || 0;
-        if (tx.type === 'income') incomeTotals[pos] += amt;
-        else expenseTotals[pos] += amt;
-      });
-      myLineChart.data.datasets[0].data = expenseTotals;
-      myLineChart.data.datasets[1].data = incomeTotals;
-      myLineChart.update();
-      const totalIncome = incomeTotals.reduce((s, v) => s + v, 0);
-      const totalExpense = expenseTotals.reduce((s, v) => s + v, 0);
-      myPieChart.data.datasets[0].data = [totalIncome, totalExpense];
-      myPieChart.update();
-    }
+        // Load and display transactions
+        async function loadTransactions() {
+            try {
+                const res = await fetch('/api/transactions', { credentials: 'same-origin' });
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}`);
+                }
 
-  } catch (err) {
-    console.error('loadTransactions error', err);
-    const listEl = document.getElementById('transactionsList');
-    listEl.innerHTML = '<div class="text-danger p-3">Error loading transactions. Check console for details.</div>';
-  }
-}
+                const data = await res.json();
+                
+                // Handle different response formats
+                let txs = [];
+                if (Array.isArray(data)) txs = data;
+                else if (Array.isArray(data.transactions)) txs = data.transactions;
+                else if (Array.isArray(data.items)) txs = data.items;
+                else if (Array.isArray(data.data)) txs = data.data;
+                else if (Array.isArray(data.results)) txs = data.results;
+                else txs = [];
 
-// Auto-refresh configuration
-const AUTO_REFRESH_MS = 30_000; // 30 seconds
-let autoRefreshId = null;
+                const list = document.getElementById('transactionsList');
+                list.innerHTML = '';
 
-function setAutoButtonState(running) {
-  const btn = document.getElementById('autoRefreshBtn');
-  const icon = document.getElementById('autoRefreshIcon');
-  if (!btn || !icon) return;
-  if (running) {
-    btn.classList.remove('btn-outline-info');
-    btn.classList.add('btn-info');
-    icon.classList.remove('bi-play-fill');
-    icon.classList.add('bi-pause-fill');
-    btn.title = 'Stop auto-refresh';
-  } else {
-    btn.classList.remove('btn-info');
-    btn.classList.add('btn-outline-info');
-    icon.classList.remove('bi-pause-fill');
-    icon.classList.add('bi-play-fill');
-    btn.title = 'Start auto-refresh';
-  }
-}
+                if (txs.length === 0) {
+                    list.innerHTML = `
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-receipt" style="font-size: 1.5rem;"></i>
+                            <p class="mt-2 mb-0">No transactions yet</p>
+                            <small>Use "Add Transaction" to create your first transaction</small>
+                        </div>
+                    `;
+                    updateChartsWithData([]);
+                    return;
+                }
 
-function startAutoRefresh() {
-  if (autoRefreshId) return; // already running
-  // immediate refresh then schedule
-  (async () => {
-    try {
-      await loadCategories(document.getElementById('txType').value);
-      await loadTransactions();
-      await loadDashboardSummary();
-    } catch (err) {
-      console.error('Auto-refresh first run failed', err);
-    }
-  })();
-  autoRefreshId = setInterval(async () => {
-    try {
-      await loadTransactions();
-      await loadDashboardSummary();
-    } catch (err) {
-      console.error('Auto-refresh failed', err);
-    }
-  }, AUTO_REFRESH_MS);
-  setAutoButtonState(true);
-}
+                // Normalize transaction data
+                const normalized = txs.map(tx => {
+                    const id = tx._id || tx.id || tx._uid || null;
+                    const rawDate = tx.date || tx.createdAt || tx.timestamp || new Date().toISOString();
+                    const dateObj = new Date(rawDate);
+                    const amount = Number(tx.amount ?? tx.value ?? 0);
+                    const type = tx.type || (amount < 0 ? 'expense' : 'income');
+                    const description = tx.description || tx.desc || tx.note || '';
+                    const categoryName = (tx.categoryId && typeof tx.categoryId === 'object' && tx.categoryId.name)
+                        ? tx.categoryId.name
+                        : (tx.categoryName || tx.category || (typeof tx.categoryId === 'string' ? tx.categoryId : 'Uncategorized'));
+                    
+                    return { 
+                        id, 
+                        date: dateObj, 
+                        amount: Math.abs(amount), 
+                        rawAmount: amount, 
+                        type, 
+                        description, 
+                        categoryName, 
+                        original: tx 
+                    };
+                });
 
-function stopAutoRefresh() {
-  if (!autoRefreshId) return;
-  clearInterval(autoRefreshId);
-  autoRefreshId = null;
-  setAutoButtonState(false);
-}
+                // Sort by date (newest first)
+                normalized.sort((a, b) => b.date - a.date);
 
-// Toggle auto-refresh via the Auto button
-(function bindAutoRefreshButton() {
-  const btn = document.getElementById('autoRefreshBtn');
-  if (!btn) return;
-  btn.addEventListener('click', () => {
-    if (autoRefreshId) stopAutoRefresh();
-    else startAutoRefresh();
-  });
-})();
+                // Display transactions
+                normalized.forEach(tx => {
+                    const item = document.createElement('div');
+                    item.className = `list-group-item transaction-item ${tx.type} px-0`;
+                    item.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center mb-1">
+                                    <span class="badge ${tx.type === 'income' ? 'bg-success' : 'bg-danger'} me-2">${tx.type}</span>
+                                    <span class="fw-bold">${tx.categoryName}</span>
+                                </div>
+                                <p class="mb-1 text-muted small">${tx.description || 'No description'}</p>
+                                <small class="text-muted">${tx.date.toLocaleDateString()}</small>
+                            </div>
+                            <div class="d-flex flex-column align-items-end">
+                                <span class="fw-bold ${tx.type === 'income' ? 'text-success' : 'text-danger'} mb-1">
+                                    ${tx.type === 'income' ? '+' : '-'}$${tx.amount.toFixed(2)}
+                                </span>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" data-action="edit" data-id="${tx.id}">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger" data-action="delete" data-id="${tx.id}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    list.appendChild(item);
+                });
 
-// Optional: start auto-refresh automatically on page load
-// startAutoRefresh(); // uncomment if you want auto to start by default
+                // Add event listeners for edit/delete buttons
+                list.querySelectorAll('button[data-action]').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const action = btn.getAttribute('data-action');
+                        const id = btn.getAttribute('data-id');
+                        await handleTransactionAction(action, id, normalized);
+                    });
+                });
 
-// refresh button wiring — bind immediately (script is at page bottom so DOM elements exist)
-(function() {
-  const refreshBtn = document.getElementById('refreshBtn');
-  if (!refreshBtn) return;
+                // Update charts with the normalized data
+                updateChartsWithData(normalized);
 
-  const originalHtml = refreshBtn.innerHTML;
-  refreshBtn.addEventListener('click', async () => {
-    try {
-      refreshBtn.disabled = true;
-      refreshBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Refreshing';
-      await loadCategories(document.getElementById('txType').value);
-      await loadTransactions();
-      await loadDashboardSummary();
-    } catch (err) {
-      console.error('Refresh failed:', err);
-      alert('Refresh failed — check console for details.');
-    } finally {
-      refreshBtn.disabled = false;
-      refreshBtn.innerHTML = originalHtml;
-    }
-  });
-})();
-</script>
+            } catch (err) {
+                console.error('loadTransactions error', err);
+                const list = document.getElementById('transactionsList');
+                list.innerHTML = `
+                    <div class="text-center py-4 text-danger">
+                        <i class="bi bi-exclamation-triangle" style="font-size: 1.5rem;"></i>
+                        <p class="mt-2 mb-0">Error loading transactions</p>
+                        <small>Please check your connection and try again</small>
+                    </div>
+                `;
+            }
+        }
 
+        // Update charts with transaction data
+        function updateChartsWithData(transactions) {
+            const currentMonth = new Date().getMonth();
+            
+            // Initialize arrays for monthly data
+            const incomeTotals = new Array(12).fill(0);
+            const expenseTotals = new Array(12).fill(0);
+            
+            // Calculate monthly totals
+            transactions.forEach(tx => {
+                const date = tx.date;
+                if (!(date instanceof Date) || isNaN(date)) return;
+                
+                const txMonth = date.getMonth();
+                const pos = (txMonth - currentMonth + 12) % 12;
+                
+                if (pos >= 0 && pos < 12) {
+                    if (tx.type === 'income') {
+                        incomeTotals[pos] += tx.amount;
+                    } else {
+                        expenseTotals[pos] += tx.amount;
+                    }
+                }
+            });
+
+            // Update line chart
+            if (myLineChart) {
+                myLineChart.data.datasets[0].data = expenseTotals;
+                myLineChart.data.datasets[1].data = incomeTotals;
+                myLineChart.update();
+            }
+
+            // Update pie chart with totals
+            const totalIncome = incomeTotals.reduce((sum, val) => sum + val, 0);
+            const totalExpense = expenseTotals.reduce((sum, val) => sum + val, 0);
+            
+            if (myPieChart) {
+                myPieChart.data.datasets[0].data = [totalIncome, totalExpense];
+                myPieChart.update();
+            }
+        }
+
+        // Handle transaction actions (edit/delete)
+        async function handleTransactionAction(action, id, transactions) {
+            if (action === 'delete') {
+                if (!confirm('Are you sure you want to delete this transaction?')) return;
+                
+                try {
+                    const res = await fetch(`/api/transactions/${id}`, {
+                        method: 'DELETE',
+                        credentials: 'same-origin'
+                    });
+                    
+                    if (res.ok) {
+                        await loadTransactions();
+                        await loadDashboardSummary();
+                    } else {
+                        alert('Failed to delete transaction');
+                    }
+                } catch (err) {
+                    console.error('Delete failed', err);
+                    alert('Error deleting transaction');
+                }
+            } else if (action === 'edit') {
+                const tx = transactions.find(t => t.id === id);
+                if (!tx) {
+                    alert('Transaction not found');
+                    return;
+                }
+                
+                // Populate form with transaction data
+                document.getElementById('txType').value = tx.type;
+                await loadCategories(tx.type);
+                document.getElementById('txCategory').value = tx.categoryName;
+                document.getElementById('txAmount').value = tx.amount;
+                document.getElementById('txDesc').value = tx.description || '';
+                document.getElementById('txDate').value = tx.date.toISOString().slice(0, 10);
+                
+                // Set category limit if available
+                if (tx.original && tx.original.categoryId && typeof tx.original.categoryId.budgetLimit !== 'undefined') {
+                    document.getElementById('txCategoryLimit').value = tx.original.categoryId.budgetLimit;
+                }
+                
+                // Set transaction ID for update
+                document.getElementById('txForm').dataset.txId = id;
+                
+                // Show modal
+                const modal = new bootstrap.Modal(document.getElementById('addTransaction'));
+                modal.show();
+            }
+        }
+
+        // Auto-refresh functionality
+        const AUTO_REFRESH_MS = 30000; // 30 seconds
+        let autoRefreshId = null;
+
+        function setAutoButtonState(running) {
+            const btn = document.getElementById('autoRefreshBtn');
+            const icon = document.getElementById('autoRefreshIcon');
+            if (!btn || !icon) return;
+            
+            if (running) {
+                btn.classList.remove('btn-outline-info');
+                btn.classList.add('btn-info', 'text-white');
+                icon.classList.remove('bi-play-fill');
+                icon.classList.add('bi-pause-fill');
+            } else {
+                btn.classList.remove('btn-info', 'text-white');
+                btn.classList.add('btn-outline-info');
+                icon.classList.remove('bi-pause-fill');
+                icon.classList.add('bi-play-fill');
+            }
+        }
+
+        function startAutoRefresh() {
+            if (autoRefreshId) return;
+            autoRefreshId = setInterval(async () => {
+                await loadTransactions();
+                await loadDashboardSummary();
+            }, AUTO_REFRESH_MS);
+            setAutoButtonState(true);
+        }
+
+        function stopAutoRefresh() {
+            if (!autoRefreshId) return;
+            clearInterval(autoRefreshId);
+            autoRefreshId = null;
+            setAutoButtonState(false);
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize charts
+            initializeCharts();
+            
+            // Set up form submission
+            document.getElementById('txForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const form = e.currentTarget;
+                const txId = form.dataset.txId;
+                const payload = {
+                    categoryName: document.getElementById('txCategory').value.trim(),
+                    budgetLimit: parseFloat(document.getElementById('txCategoryLimit').value) || undefined,
+                    type: document.getElementById('txType').value,
+                    amount: parseFloat(document.getElementById('txAmount').value),
+                    description: document.getElementById('txDesc').value.trim(),
+                    date: document.getElementById('txDate').value
+                };
+
+                try {
+                    const url = txId ? `/api/transactions/${txId}` : '/api/transactions';
+                    const method = txId ? 'PUT' : 'POST';
+                    
+                    const res = await fetch(url, {
+                        method,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (res.ok) {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('addTransaction'));
+                        modal.hide();
+                        form.removeAttribute('data-tx-id');
+                        
+                        // Reload data
+                        await loadCategories(payload.type);
+                        await loadTransactions();
+                        await loadDashboardSummary();
+                    } else {
+                        const error = await res.json().catch(() => ({ message: 'Unknown error' }));
+                        alert(`Error: ${error.message || error.error || 'Failed to save transaction'}`);
+                    }
+                } catch (err) {
+                    console.error('Submit error', err);
+                    alert('An error occurred while saving the transaction');
+                }
+            });
+
+            // Set up category loading when type changes
+            document.getElementById('txType').addEventListener('change', function() {
+                loadCategories(this.value);
+            });
+
+            // Set up modal events
+            document.getElementById('addTransaction').addEventListener('show.bs.modal', () => {
+                // Prefill date if empty
+                const dateInput = document.getElementById('txDate');
+                if (!dateInput.value) {
+                    dateInput.value = new Date().toISOString().slice(0, 10);
+                }
+                
+                // Clear transaction ID for new transactions
+                if (!document.getElementById('txForm').dataset.txId) {
+                    document.getElementById('txCategoryLimit').value = '';
+                }
+            });
+
+            document.getElementById('addTransaction').addEventListener('hidden.bs.modal', () => {
+                const form = document.getElementById('txForm');
+                form.removeAttribute('data-tx-id');
+            });
+
+            // Set up refresh button
+            document.getElementById('refreshBtn').addEventListener('click', async () => {
+                await loadTransactions();
+                await loadDashboardSummary();
+            });
+
+            // Set up auto-refresh toggle
+            document.getElementById('autoRefreshBtn').addEventListener('click', () => {
+                if (autoRefreshId) {
+                    stopAutoRefresh();
+                } else {
+                    startAutoRefresh();
+                }
+            });
+
+            // Load initial data
+            loadCategories('expense');
+            loadTransactions();
+            loadDashboardSummary();
+            
+            // Start auto-refresh by default
+            startAutoRefresh();
+        });
+    </script>
+</body>
 </html>

@@ -19,12 +19,8 @@ const FacebookStrategy = require('passport-facebook').Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('./models/User');
 
-// Import routes and middleware that were referenced but not required
+// Import routes and middleware
 const authRoutes = require('./routes/authRoutes');
-const categoryRoutes = require('./routes/categoryRoutes');
-const transactionRoutes = require('./routes/transactionRoutes');
-const budgetRoutes = require('./routes/budgetRoutes');
-const dashboardRoutes = require('./routes/dashboardRoutes');
 const { setupPassportSerialization, isLoggedIn } = require('./middleware/authMiddleware');
 
 // **FIX: Create session store with error handling and connection retry**
@@ -190,9 +186,6 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 // Passport Middleware Serialization
 setupPassportSerialization(passport);
 
-app.use('/', authRoutes);
-
-// Routes
 app.get('/', (req, res) => {
     res.render('index', { title: 'Home', user: req.user });
 });
@@ -202,11 +195,13 @@ app.get('/dashboard', isLoggedIn, (req, res) => {
 });
 
 // Register routes
-app.use('/auth', authRoutes);                     // Authentication and password recovery
-app.use('/api/categories', categoryRoutes);       // Category CRUD
-app.use('/api/transactions', transactionRoutes);  // Transaction CRUD
-app.use('/api/budgets', budgetRoutes);           // Budget CRUD
-app.use('/api/dashboard', dashboardRoutes);      // Dashboard analytics
+// Mount auth routes at both root and /auth to preserve existing template paths
+app.use('/', authRoutes);      // supports /login, /register, /profile, etc.
+app.use('/auth', authRoutes);  // supports /auth/... (used by some templates / client JS)
+
+// Consolidated API mount (unchanged)
+const apiRoutes = require('./routes/api');
+app.use('/api', apiRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -235,8 +230,6 @@ const startServer = async () => {
         // Fallback to memory store if MongoDB fails
         sessionStore = createFallbackStore();
         
-        // Note: session middleware was already configured at startup; for a robust fallback
-        // you may re-initialize the session middleware here in future iterations.
         app.listen(PORT, () => {
             logger.info(`🚀 Server is running on http://localhost:${PORT} (with memory sessions)`);
         });

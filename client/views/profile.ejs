@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Profile - Budget Tracker</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/public/css/styles.css">
+  <link rel="stylesheet" href="/public/styles.css">
 </head>
 <body>
   <div class="container my-5">
@@ -15,20 +15,35 @@
         <p><strong>Username:</strong> <%= user?.username || '—' %></p>
         <p><strong>Display name:</strong> <%= user?.displayName || '—' %></p>
         <p><strong>Email:</strong> <%= user?.email || '—' %></p>
-        <p><strong>Account type:</strong> <%= user?.type || 'local' %></p>
+        <% 
+          // Report linked providers instead of relying solely on `type`
+          const providers = [];
+          if (!user || (!user.googleId && !user.facebookId && user.type === 'local')) providers.push('local');
+          if (user?.googleId) providers.push('google');
+          if (user?.facebookId) providers.push('facebook');
+          // keep a fallback
+          if (providers.length === 0) providers.push(user?.type || 'local');
+        %>
+        <p><strong>Account type:</strong> <%= providers.join(', ') %></p>
 
         <hr />
         <h5>Edit Profile</h5>
+        <% if (typeof updated !== 'undefined' && updated) { %>
+          <div class="alert alert-success">Profile updated.</div>
+        <% } else if (typeof error !== 'undefined' && error) { %>
+          <div class="alert alert-danger"><%= error %></div>
+        <% } %>
+
         <form method="POST" action="/auth/update-profile">
           <div class="mb-3">
-            <label class="form-label">Display name</label>
-            <input name="displayName" class="form-control" value="<%= user?.displayName || '' %>" />
+            <label for="displayName" class="form-label">Display name</label>
+            <input id="displayName" name="displayName" class="form-control" value="<%= user.displayName || '' %>">
           </div>
           <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input name="email" type="email" class="form-control" value="<%= user?.email || '' %>" />
+            <label for="email" class="form-label">Email</label>
+            <input id="email" name="email" class="form-control" value="<%= user.email || '' %>">
           </div>
-          <button class="btn btn-primary" type="submit">Update profile</button>
+          <button class="btn btn-primary" type="submit">Save Profile</button>
         </form>
       </div>
     </div>

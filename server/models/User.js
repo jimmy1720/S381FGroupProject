@@ -59,6 +59,11 @@ const userSchema = new mongoose.Schema({
     resetTokenExpiry: {
         type: Date,
         sparse: true // Token expiration time
+    },
+
+    // Add prefs (used by settings view)
+    prefs: {
+        darkMode: { type: Boolean, default: false }
     }
 });
 

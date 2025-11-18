@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { isLoggedIn } = require('../middleware/authMiddleware');
-const tc = require('../controllers/transactionController');
-const categoryController = require('../controllers/categoryController'); // <-- fixed import
 
-router.get('/categories', isLoggedIn, categoryController.getCategories); // <-- use correct controller
-router.get('/transactions', isLoggedIn, tc.getTransactions);
-router.post('/transactions', isLoggedIn, express.json(), tc.createTransaction);
-router.delete('/transactions/:id', isLoggedIn, tc.deleteTransaction);
+// Aggregate existing API route modules under a single /api mount to reduce duplication.
+router.use('/categories', require('./categoryRoutes'));
+router.use('/transactions', require('./transactionRoutes'));
+router.use('/budgets', require('./budgetRoutes'));
+router.use('/dashboard', require('./dashboardRoutes'));
+
+// NEW: users demo CRUD (no auth)
+router.use('/users', require('./userRoutes'));
 
 module.exports = router;
