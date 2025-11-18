@@ -58,24 +58,38 @@ router.post('/reset-password', passwordController.resetPassword);
 
 // OAuth: Facebook
 if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
-    router.get("/auth/facebook", passport.authenticate("facebook", { scope: ["email", "public_profile"] }));
-    router.get("/auth/facebook/callback", passport.authenticate("facebook", {
-        successRedirect: "/dashboard",
-        failureRedirect: "/login?error=facebook_auth_failed"
-    }));
+    // start FB login (route will be /auth/facebook if router is mounted at '/auth')
+    router.get('/facebook', passport.authenticate('facebook', { scope: ['email', 'public_profile'] }));
+
+    // callback: authenticate, ensure session persisted, then redirect
+    router.get('/facebook/callback',
+      passport.authenticate('facebook', { failureRedirect: '/login?error=facebook_auth_failed' }),
+      (req, res) => {
+        // debug
+        console.log('Facebook callback - user:', req.user ? req.user.id : null);
+        // ensure session is saved to store before redirecting
+        req.session.save(err => {
+          if (err) console.error('Session save error after FB auth:', err);
+          return res.redirect('/dashboard');
+        });
+      }
+    );
 } else {
     console.log('⚠️  Facebook OAuth not configured - missing environment variables');
 }
 
 // OAuth: Google
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    router.get('/auth/google', passport.authenticate('google', { 
-        scope: ['profile', 'email'] 
-    }));
-    router.get('/auth/google/callback', passport.authenticate('google', {
-        successRedirect: '/dashboard',
-        failureRedirect: '/login?error=google_auth_failed'
-    }));
+    router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+    router.get('/google/callback',
+      passport.authenticate('google', { failureRedirect: '/login?error=google_auth_failed' }),
+      (req, res) => {
+        req.session.save(err => {
+          if (err) console.error('Session save error after Google auth:', err);
+          return res.redirect('/dashboard');
+        });
+      }
+    );
 } else {
     console.log('⚠️  Google OAuth not configured - missing environment variables');
 }
