@@ -199,9 +199,12 @@ app.get('/dashboard', isLoggedIn, (req, res) => {
 app.use('/', authRoutes);      // supports /login, /register, /profile, etc.
 app.use('/auth', authRoutes);  // supports /auth/... (used by some templates / client JS)
 
-// Consolidated API mount (unchanged)
-const apiRoutes = require('./routes/api');
+const apiRoutes = require('./routes/apiRoutes');
 app.use('/api', apiRoutes);
+
+// Add public APIs (no authentication required)
+const PublicApiRoutes = require('./routes/PublicApiRoutes');
+app.use('/public/api', PublicApiRoutes);
 
 // 404 handler
 app.use((req, res) => {

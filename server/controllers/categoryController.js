@@ -1,6 +1,6 @@
 const BudgetCategory = require('../models/BudgetCategory');
 const Transaction = require('../models/Transaction');
-const Budget = require('../models/Budget.JS'); // fixed filename import
+const Budget = require('../models/Budget'); // fixed filename import
 
 // Create new category
 async function createCategory(req, res) {

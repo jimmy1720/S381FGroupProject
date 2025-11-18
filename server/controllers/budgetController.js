@@ -1,4 +1,4 @@
-const Budget = require('../models/Budget.JS'); // fixed filename
+const Budget = require('../models/Budget'); 
 const BudgetCategory = require('../models/BudgetCategory');
 
 // Create new budget

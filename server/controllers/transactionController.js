@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Transaction = require('../models/Transaction');
 const BudgetCategory = require('../models/BudgetCategory');
+const Budget = require('../models/Budget');
 const logger = require('../utils/logger');
 
 // Create new transaction
@@ -25,6 +26,12 @@ async function createTransaction(req, res) {
                 _id: categoryId, 
                 userId: req.user.id 
             });
+            
+            // Update budget limit if provided
+            if (category && typeof budgetLimit !== 'undefined' && !isNaN(Number(budgetLimit))) {
+                category.budgetLimit = Number(budgetLimit);
+                await category.save();
+            }
         } else if (categoryName) {
             // Attempt to find category by name for this user
             category = await BudgetCategory.findOne({
@@ -41,6 +48,12 @@ async function createTransaction(req, res) {
                     budgetLimit: (typeof budgetLimit !== 'undefined' && !isNaN(Number(budgetLimit))) ? Number(budgetLimit) : 0
                 });
                 await category.save();
+            } else {
+                // Update existing category's budget limit if provided
+                if (typeof budgetLimit !== 'undefined' && !isNaN(Number(budgetLimit))) {
+                    category.budgetLimit = Number(budgetLimit);
+                    await category.save();
+                }
             }
         }
 
@@ -58,12 +71,21 @@ async function createTransaction(req, res) {
         });
 
         await transaction.save();
-        // populate category for client
-        const populated = await Transaction.findById(transaction._id).populate('categoryId', 'name type budgetLimit');
-        res.status(201).json({ transaction: populated });
+        
+        // Refresh category data to get updated budgetLimit
+        const updatedCategory = await BudgetCategory.findById(category._id);
+        
+        // Populate category for client with updated budgetLimit
+        const populated = await Transaction.findById(transaction._id)
+            .populate('categoryId', 'name type budgetLimit');
+            
+        res.status(201).json({ 
+            transaction: populated,
+            message: 'Transaction created successfully'
+        });
     } catch (err) {
         console.error('Create transaction error:', err);
-        res.status(500).json({ error: 'Failed to create transaction' });
+        res.status(500).json({ error: 'Failed to create transaction: ' + err.message });
     }
 }
 
@@ -99,7 +121,12 @@ async function getTransactions(req, res) {
             .populate('categoryId', 'name type budgetLimit'); // Include category details and budgetLimit
 
         // return consistent wrapper
-        res.json({ transactions });
+        res.json({ 
+            transactions,
+            total: transactions.length,
+            page: parsedPage,
+            limit: parsedLimit
+        });
     } catch (err) {
         logger.error('Get transactions error:', err);
         res.status(500).json({ error: 'Failed to fetch transactions' });
@@ -127,18 +154,50 @@ async function updateTransaction(req, res) {
                 category = new BudgetCategory({
                     userId: req.user.id,
                     name: updates.categoryName.trim(),
-                    type: updates.type === 'income' ? 'income' : (updates.type === 'expense' ? 'expense' : 'expense')
+                    type: updates.type === 'income' ? 'income' : (updates.type === 'expense' ? 'expense' : 'expense'),
+                    budgetLimit: (typeof updates.budgetLimit !== 'undefined' && !isNaN(Number(updates.budgetLimit))) ? Number(updates.budgetLimit) : 0
                 });
                 await category.save();
+            } else {
+                // Update budget limit if provided
+                if (typeof updates.budgetLimit !== 'undefined' && !isNaN(Number(updates.budgetLimit))) {
+                    category.budgetLimit = Number(updates.budgetLimit);
+                    await category.save();
+                }
             }
             updates.categoryId = category._id;
             delete updates.categoryName;
+            delete updates.budgetLimit; // Remove budgetLimit from transaction updates
         } else if (updates.categoryId) {
             // verify ownership
             const category = await BudgetCategory.findOne({ _id: updates.categoryId, userId: req.user.id });
             if (!category) {
                 return res.status(404).json({ error: 'Category not found or not owned by user' });
             }
+            
+            // Update budget limit if provided
+            if (typeof updates.budgetLimit !== 'undefined' && !isNaN(Number(updates.budgetLimit))) {
+                category.budgetLimit = Number(updates.budgetLimit);
+                await category.save();
+            }
+            delete updates.budgetLimit; // Remove budgetLimit from transaction updates
+        }
+
+        // Handle budget limit update for existing category
+        if (updates.budgetLimit && !updates.categoryName && !updates.categoryId) {
+            // Get current transaction to find its category
+            const currentTransaction = await Transaction.findOne({ _id: id, userId: req.user.id });
+            if (currentTransaction) {
+                const category = await BudgetCategory.findOne({ 
+                    _id: currentTransaction.categoryId, 
+                    userId: req.user.id 
+                });
+                if (category) {
+                    category.budgetLimit = Number(updates.budgetLimit);
+                    await category.save();
+                }
+            }
+            delete updates.budgetLimit; // Remove budgetLimit from transaction updates
         }
 
         // Normalize date if provided
@@ -148,15 +207,19 @@ async function updateTransaction(req, res) {
             { _id: id, userId: req.user.id },
             updates,
             { new: true, runValidators: true }
-        ).populate('categoryId', 'name type');
+        ).populate('categoryId', 'name type budgetLimit');
 
         if (!transaction) {
             return res.status(404).json({ error: 'Transaction not found' });
         }
-        res.json({ transaction });
+        
+        res.json({ 
+            transaction,
+            message: 'Transaction updated successfully'
+        });
     } catch (err) {
         console.error('Update transaction error:', err);
-        res.status(500).json({ error: 'Failed to update transaction' });
+        res.status(500).json({ error: 'Failed to update transaction: ' + err.message });
     }
 }
 
@@ -173,7 +236,11 @@ async function deleteTransaction(req, res) {
             return res.status(404).json({ error: 'Transaction not found' });
         }
         // return json for client convenience
-        res.json({ success: true, transactionId: transaction._id });
+        res.json({ 
+            success: true, 
+            transactionId: transaction._id,
+            message: 'Transaction deleted successfully'
+        });
     } catch (err) {
         console.error('Delete transaction error:', err);
         res.status(500).json({ error: 'Failed to delete transaction' });
@@ -186,4 +253,3 @@ module.exports = {
     updateTransaction, 
     deleteTransaction 
 };
-
