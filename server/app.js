@@ -231,7 +231,6 @@ const startServer = async () => {
         
         app.listen(PORT, () => {
             console.log(`🚀 Server is running on http://localhost:${PORT}`);
-            console.log('💡 If you see session errors above, they should resolve now that DB is connected');
         });
     } catch (error) {
         console.error('❌ Failed to start server:', error);
