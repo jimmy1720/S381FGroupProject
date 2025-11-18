@@ -114,4 +114,14 @@ router.get('/user/info', isLoggedIn, (req, res) => {
     });
 });
 
+// Profile page (protected)
+router.get('/profile', isLoggedIn, (req, res) => {
+    res.render('profile', { user: req.user });
+});
+
+// Settings page (protected)
+router.get('/settings', isLoggedIn, (req, res) => {
+    res.render('settings', { user: req.user });
+});
+
 module.exports = router;

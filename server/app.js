@@ -6,22 +6,26 @@ const dotenv = require('dotenv');
 const morgan = require('morgan');
 const path = require('path');
 const connectDB = require('./config/db');
+const logger = require('./utils/logger'); // new logger
+
+dotenv.config();
+const app = express();
+
+// Ensure PORT is defined
+const PORT = process.env.PORT || 8099;
+
+// Require missing modules used later
+const FacebookStrategy = require('passport-facebook').Strategy;
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const User = require('./models/User');
+
+// Import routes and middleware that were referenced but not required
 const authRoutes = require('./routes/authRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
 const budgetRoutes = require('./routes/budgetRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
-
-const { isLoggedIn, setupPassportSerialization } = require('./middleware/authMiddleware');
-const User = require('./models/User');
-const FacebookStrategy = require('passport-facebook').Strategy;
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-
-// Load environment variables from root .env file
-dotenv.config({ path: path.join(__dirname, '..', '.env') });
-
-const app = express();
-const PORT = process.env.PORT || 8099;
+const { setupPassportSerialization, isLoggedIn } = require('./middleware/authMiddleware');
 
 // **FIX: Create session store with error handling and connection retry**
 const createSessionStore = () => {
@@ -37,19 +41,18 @@ const createSessionStore = () => {
     });
 
     store.on('error', function(error) {
-        console.error('Session store error:', error);
+        logger.error('Session store error:', error);
         // Don't exit process, just log the error
-        // The store will retry when connections are made
     });
 
     store.on('connected', function() {
-        console.log('✅ Session store connected to MongoDB');
+        logger.info('✅ Session store connected to MongoDB');
     });
 
     return store;
 };
 
-const store = createSessionStore();
+let sessionStore = createSessionStore();
 
 // Middleware setup
 app.set('view engine', 'ejs');
@@ -62,7 +65,7 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'default_secret',
     resave: false,
     saveUninitialized: false,
-    store: store,
+    store: sessionStore,
     cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 },
 }));
 app.use(passport.initialize());
@@ -71,16 +74,13 @@ app.use('/public', express.static(path.join(__dirname, '../client/public')));
 
 // **FIX: Add a simple memory store fallback for development**
 const createFallbackStore = () => {
-    console.log('⚠️  Using memory session store (fallback)');
+    logger.warn('⚠️  Using memory session store (fallback)');
     return new session.MemoryStore();
 };
 
-// Use memory store if MongoDB connection fails initially
-let sessionStore = store;
-
 // Facebook Strategy
 if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
-    console.log('✅ Facebook OAuth configured');
+    logger.info('✅ Facebook OAuth configured');
     passport.use(new FacebookStrategy({
         clientID: process.env.FACEBOOK_APP_ID,
         clientSecret: process.env.FACEBOOK_APP_SECRET,
@@ -125,17 +125,17 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
             return done(null, user);
             
         } catch (err) {
-            console.error('Facebook OAuth error:', err);
+            logger.error('Facebook OAuth error:', err);
             return done(err, null);
         }
     }));
 } else {
-    console.log('⚠️  Facebook OAuth not configured');
+    logger.warn('⚠️  Facebook OAuth not configured');
 }
 
 // Google Strategy
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    console.log('✅ Google OAuth configured');
+    logger.info('✅ Google OAuth configured');
     passport.use(new GoogleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -179,12 +179,12 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
             return done(null, user);
             
         } catch (err) {
-            console.error('Google OAuth error:', err);
+            logger.error('Google OAuth error:', err);
             return done(err, null);
         }
     }));
 } else {
-    console.log('⚠️  Google OAuth not configured');
+    logger.warn('⚠️  Google OAuth not configured');
 }
 
 // Passport Middleware Serialization
@@ -215,31 +215,30 @@ app.use((req, res) => {
 
 // Global error handler
 app.use((err, req, res, next) => {
-    console.error('Global error handler:', err);
+    logger.error('Global error handler:', err);
     res.status(500).render('error', { error: 'Something went wrong!' });
 });
 
 // Connect to DB and start server
 const startServer = async () => {
     try {
-        console.log('🔗 Attempting to connect to MongoDB...');
+        logger.info('🔗 Attempting to connect to MongoDB...');
         await connectDB();
-        console.log('✅ Database connected successfully');
-        
-        // Once DB is connected, the session store should work
-        // If you want to verify session store connection, you can add a check here
+        logger.info('✅ Database connected successfully');
         
         app.listen(PORT, () => {
-            console.log(`🚀 Server is running on http://localhost:${PORT}`);
+            logger.info(`🚀 Server is running on http://localhost:${PORT}`);
         });
     } catch (error) {
-        console.error('❌ Failed to start server:', error);
-        console.log('💡 Using memory session store for development');
+        logger.error('❌ Failed to start server:', error);
+        logger.warn('💡 Using memory session store for development');
         // Fallback to memory store if MongoDB fails
         sessionStore = createFallbackStore();
         
+        // Note: session middleware was already configured at startup; for a robust fallback
+        // you may re-initialize the session middleware here in future iterations.
         app.listen(PORT, () => {
-            console.log(`🚀 Server is running on http://localhost:${PORT} (with memory sessions)`);
+            logger.info(`🚀 Server is running on http://localhost:${PORT} (with memory sessions)`);
         });
     }
 };

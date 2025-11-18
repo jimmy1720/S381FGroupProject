@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Profile - Budget Tracker</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/public/css/styles.css">
+</head>
+<body>
+  <div class="container my-5">
+    <h1>Your Profile</h1>
+    <div class="card">
+      <div class="card-body">
+        <p><strong>Username:</strong> <%= user?.username || '—' %></p>
+        <p><strong>Display name:</strong> <%= user?.displayName || '—' %></p>
+        <p><strong>Email:</strong> <%= user?.email || '—' %></p>
+        <p><strong>Account type:</strong> <%= user?.type || 'local' %></p>
+
+        <hr />
+        <h5>Edit Profile</h5>
+        <form method="POST" action="/auth/update-profile">
+          <div class="mb-3">
+            <label class="form-label">Display name</label>
+            <input name="displayName" class="form-control" value="<%= user?.displayName || '' %>" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input name="email" type="email" class="form-control" value="<%= user?.email || '' %>" />
+          </div>
+          <button class="btn btn-primary" type="submit">Update profile</button>
+        </form>
+      </div>
+    </div>
+
+    <a href="/dashboard" class="btn btn-link mt-3">Back to Dashboard</a>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

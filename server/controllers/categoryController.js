@@ -1,11 +1,11 @@
 const BudgetCategory = require('../models/BudgetCategory');
 const Transaction = require('../models/Transaction');
-const Budget = require('../models/Budget');
+const Budget = require('../models/Budget.JS'); // fixed filename import
 
 // Create new category
 async function createCategory(req, res) {
     try {
-        const { name, type } = req.body;
+        const { name, type, budgetLimit } = req.body;
         
         // Validate required fields
         if (!name || !type) {
@@ -15,11 +15,13 @@ async function createCategory(req, res) {
         const category = new BudgetCategory({ 
             userId: req.user.id, 
             name, 
-            type 
+            type,
+            budgetLimit: budgetLimit ? Number(budgetLimit) : 0
         });
         await category.save();
         
-        res.status(201).json({ categoryId: category._id });
+        // return full category so client has limit and id
+        res.status(201).json({ category });
     } catch (err) {
         console.error('Create category error:', err);
         res.status(500).json({ error: 'Failed to create category' });
@@ -29,25 +31,35 @@ async function createCategory(req, res) {
 // Get all categories for current user
 async function getCategories(req, res) {
     try {
-        // Return all categories (no type filter needed)
-        const categories = await BudgetCategory.find({ userId: req.user.id });
-        res.json(categories);
+        // Support optional kind/type filter (e.g. ?kind=income)
+        const { kind } = req.query;
+        const q = { userId: req.user.id };
+        if (kind && (kind === 'income' || kind === 'expense')) {
+            q.type = kind;
+        }
+        const categories = await BudgetCategory.find(q);
+        // return wrapped shape the client expects
+        res.json({ categories });
     } catch (err) {
         console.error('Get categories error:', err);
         res.status(500).json({ error: 'Failed to fetch categories' });
     }
 }
 
-// Update category name
+// Update category name and/or budgetLimit
 async function updateCategory(req, res) {
     try {
         const { id } = req.params;
-        const { name } = req.body;
+        const { name, budgetLimit } = req.body;
+
+        const updates = {};
+        if (typeof name !== 'undefined') updates.name = name;
+        if (typeof budgetLimit !== 'undefined') updates.budgetLimit = Number(budgetLimit);
 
         // Ensure user owns this category
         const category = await BudgetCategory.findOneAndUpdate(
             { _id: id, userId: req.user.id },
-            { name },
+            updates,
             { new: true, runValidators: true }
         );
 

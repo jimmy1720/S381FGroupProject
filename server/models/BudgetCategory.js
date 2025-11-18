@@ -13,6 +13,13 @@ const budgetCategorySchema = new mongoose.Schema({
         minlength: 3,
         maxlength: 50
     },
+    // Add type so we can distinguish income vs expense categories
+    type: {
+        type: String,
+        enum: ['income', 'expense'],
+        required: true,
+        default: 'expense'
+    },
     budgetLimit: {
         type: Number,
         default: 0,

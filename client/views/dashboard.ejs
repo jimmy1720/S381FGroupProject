@@ -11,21 +11,29 @@
 </head>
 
 <body>
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container">
-                <a class="navbar-brand" href="#">Budget Tracker</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+    <!-- Header: add Profile & Settings buttons -->
+<header>
+	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+		<div class="container">
+			<a class="navbar-brand" href="#">Budget Tracker</a>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                     data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="d-flex align-items-center">
-                    <button onclick="location.href='/'" class="btn btn-outline-light btn-sm me-2">Logout</button>
-                </div>
-            </div>
-        </nav>
-    </header>
+			<div class="d-flex align-items-center">
+				<a href="/profile" class="btn btn-outline-light btn-sm me-2" title="Profile">
+					<i class="bi bi-person-circle"></i>
+				</a>
+				<a href="/settings" class="btn btn-outline-light btn-sm me-2" title="Settings">
+					<i class="bi bi-gear"></i>
+				</a>
+				<button onclick="location.href='/'" class="btn btn-outline-light btn-sm">Logout</button>
+			</div>
+		</div>
+	</nav>
+</header>
+
     <main class="container mt-5">
         <% function properCase(name) {
             return String(name).trim().split(/\s+/).map(function(word) {
@@ -45,23 +53,54 @@
 
         <!-- Modal for Add Transaction and Category -->
         <div class="modal fade" id="addTransaction" tabindex="-1" role="dialog" aria-labelledby="addTransactionModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addTransactionModalLabel">Add Transaction</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                    </button>
+          <div class="modal-dialog" role="document">
+            <form id="txForm" class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="addTransactionModalLabel">Add Transaction</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body p-3">
+                <div class="mb-2">
+                  <label class="form-label">Type</label>
+                  <select id="txType" class="form-select" required>
+                    <option value="expense">Expense</option>
+                    <option value="income">Income</option>
+                  </select>
                 </div>
-                <div class="modal-body">
-                    ...
+
+                <div class="mb-2">
+                  <label class="form-label">Category</label>
+                  <!-- input + datalist so user can type new or pick existing -->
+                  <input id="txCategory" list="txCategoryList" class="form-control" placeholder="Select or type a category" required />
+                  <datalist id="txCategoryList"></datalist>
+                  <small class="form-text text-muted">Choose existing or type new and press Enter</small>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
+
+                <div class="mb-2">
+                  <label class="form-label">Category limit (optional)</label>
+                  <input id="txCategoryLimit" type="number" step="0.01" min="0" class="form-control" placeholder="Set spending limit for this category (optional)" />
+                  <small class="form-text text-muted">This will set or update the budget limit for the chosen category.</small>
                 </div>
+
+                <div class="mb-2">
+                  <label class="form-label">Amount</label>
+                  <input id="txAmount" type="number" step="0.01" class="form-control" required />
                 </div>
-            </div>
+                <div class="mb-2">
+                  <label class="form-label">Description</label>
+                  <input id="txDesc" type="text" class="form-control" />
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Date</label>
+                  <input id="txDate" type="date" class="form-control" />
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button id="txSave" type="submit" class="btn btn-primary">Save</button>
+              </div>
+            </form>
+          </div>
         </div>
 
         <div class="row">
@@ -76,19 +115,19 @@
                                 <div class="col-md-4 mb-2">
                                     <div class="bg-light p-3 rounded">
                                         <h6 class="mb-1 text-success">Total Income</h6>
-                                        <div class="h4 m-0">111</div>
+                                        <div id="totalIncome" class="h4 m-0">0</div>
                                     </div>
                                 </div>
                                 <div class="col-md-4 mb-2">
                                     <div class="bg-light p-3 rounded">
                                         <h6 class="mb-1 text-danger">Total Expense</h6>
-                                        <div class="h4 m-0">111</div>
+                                        <div id="totalExpense" class="h4 m-0">0</div>
                                     </div>
                                 </div>
                                 <div class="col-md-4 mb-2">
                                     <div class="bg-light p-3 rounded">
                                         <h6 class="mb-1 text-primary">Remaining Budget</h6>
-                                        <div class="h4 m-0">111</div>
+                                        <div id="remainingBudget" class="h4 m-0">0</div>
                                     </div>
                                 </div>
                             </div>
@@ -99,7 +138,7 @@
                     </div>
                     
                     <div class="col-lg-4 col-md-4 col-12 mb-4 d-grid gap-4">
-                        <!-- Line Chart of Expenses-->
+                        <!-- Pie chart -->
                         <div class="card p-4 h-100">
                             <h3 class="card-title">Monthly Expense Ratio</h3>
                             <canvas id="myPieChart"></canvas>
@@ -108,14 +147,12 @@
                         <div class="card p-4 h-100">
                             <h2 class="card-title mb-3">Tasks</h2>
                             <div class="d-grid gap-1">
-                                <button class="btn btn-success mb-2" data-toggle="modal" data-target="">
-                                    <i class="bi bi-plus-circle"></i> Add Transaction</button>
-                                <button class="btn btn-secondary mb-2" onclick="location.href='#'">
-                                    <i class="bi bi-plus-circle"></i> Add Category</button>
+                                <button class="btn btn-success mb-2" data-bs-toggle="modal" data-bs-target="#addTransaction" id="openAddTxBtn">
+                                    <i class="bi bi-plus-circle"></i> Add Transaction
+                                </button>
                             </div>
                         </div>
                     </div>
-                    
                 </div>
             </div>
         </div>
@@ -124,58 +161,22 @@
                     <div class="col-lg-6 col-md-6 col-12 mb-4">
                         <div class="card p-4 h-100">
                             <h2 class="card-title">Recent Transactions</h2>
-                            <div class="list-group mt-3">
-                                <!-- Sample Transaction Item -->
-                                <div class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div class="d-flex">
-                                        <div class="d-grid">
-                                            <div class="d-flex">
-                                                <span class="font-weight-bold me-3">Transportation</span>
-                                                <span class="text-muted">MTR</span>
-                                            </div>
-                                            <div class="row">
-                                                <span class="text-muted">11/13/2025</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <span class="text-danger font-weight-bold">-15$</span>
-                                </div>
-
-                                <!-- Sample Transaction Item -->
-                                <div class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div class="d-flex">
-                                        <div class="d-grid">
-                                            <div class="d-flex">
-                                                <span class="font-weight-bold me-3">Groceries</span>
-                                                <span class="text-muted">Supermarket</span>
-                                            </div>
-                                            <div class="row">
-                                                <span class="text-muted">11/12/2025</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <span class="text-danger font-weight-bold">-400$</span>
-                                </div>
-
-                                <!-- Sample Transaction Item -->
-                                <div class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div class="d-flex">
-                                        <div class="d-grid">
-                                            <div class="d-flex">
-                                                <span class="font-weight-bold me-3">Salary</span>
-                                                <span class="text-muted"></span>
-                                            </div>
-                                            <div class="row">
-                                                <span class="text-muted">11/12/2025</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <span class="text-success font-weight-bold">18400$</span>
-                                </div>
-
-                                <!-- More transaction items can be added here -->
-                                
+                            <div class="d-flex justify-content-between align-items-center">
+                              <div>
+                                <button id="refreshBtn" class="btn btn-sm btn-outline-secondary me-2" title="Refresh transactions">
+                                  <i class="bi bi-arrow-clockwise"></i> Refresh
+                                </button>
+                                <!-- Auto-refresh toggle -->
+                                <button id="autoRefreshBtn" class="btn btn-sm btn-outline-info" title="Toggle auto-refresh">
+                                  <i id="autoRefreshIcon" class="bi bi-play-fill"></i> Auto
+                                </button>
+                              </div>
                             </div>
+
+                            <div class="list-group mt-3" id="transactionsList">
+                                <!-- dynamic transaction items injected by JS -->
+                            </div>
+
                             <p class="mt-3 text-end mb-0"><a href="#" class="text-decoration-none">View All Transactions &rarr;</a></p>
                         </div>
                     </div>
@@ -183,31 +184,8 @@
                     <div class="col-lg-6 col-md-6 col-12 mb-4">
                         <div class="card p-4 h-100">
                             <h2 class="card-title">Spendings</h2>
-                            <div class="row h-100">
-                                <div class="col-md-4 mb-2">
-                                    <div class="bg-danger p-3 rounded h-100">
-                                        <div class="d-flex flex-column justify-content-center h-100 text-white">
-                                            <h6 class="mb-1">Groceries</h6>
-                                            <div class="h4">$400</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 mb-2">
-                                    <div class="bg-primary p-3 rounded h-100">
-                                        <div class="d-flex flex-column justify-content-center h-100 text-white">
-                                            <h6 class="mb-1">Groceries</h6>
-                                            <div class="h4">$400</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 mb-2">
-                                    <div class="bg-success p-3 rounded h-100">
-                                        <div class="d-flex flex-column justify-content-center h-100 text-white">
-                                            <h6 class="mb-1">Transportation</h6>
-                                            <div class="h4">$50</div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div id="spendingsGrid" class="row h-100">
+                                <!-- dynamic budget/category cards injected by JS -->
                             </div>
                         </div>
                     </div>
@@ -221,16 +199,16 @@
         <p><a href="#" class="text-decoration-none">Privacy Policy</a> | <a href="#" class="text-decoration-none">Terms of Service</a> | <a href="#" class="text-decoration-none">Contact</a></p>
         <p>&copy; 2025 Budget Tracker. All rights reserved.</p>
     </footer>
-</body>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-<script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script>
   const currentMonth = new Date().getMonth(); // 0-11
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const xValues = Array.from({length: 12}, (_, i) => monthNames[(currentMonth + 1 + i) % 12]);
 
-  const expenseValues      = [65, 59, 80, 81, 56, 55, 30, 40, 70, 60, 50, 45];   
-  const incomeValues       = [120, 130, 110, 140, 125, 115, 135, 145, 150, 160, 155, 165];
+  // initial placeholders (will be updated by loadTransactions)
+  let expenseValues = new Array(12).fill(0);
+  let incomeValues = new Array(12).fill(0);
 
   const lineData = {
     labels: xValues,
@@ -239,7 +217,7 @@
         label: 'Expenses',
         data: expenseValues,
         fill: false,
-        borderColor: 'rgb(255, 99, 132)',   // red-ish
+        borderColor: 'rgb(255, 99, 132)',
         backgroundColor: 'rgba(255, 99, 132, 0.1)',
         tension: 0.2
       },
@@ -247,7 +225,7 @@
         label: 'Income',
         data: incomeValues,
         fill: false,
-        borderColor: 'rgb(75, 192, 192)',    // blue-ish 
+        borderColor: 'rgb(75, 192, 192)',
         backgroundColor: 'rgba(75, 192, 192, 0.1)',
         tension: 0.2
       }
@@ -258,46 +236,445 @@
     responsive: true,
     plugins: {
       legend: { position: 'top' },
-      title: {
-        display: true,
-        text: 'Monthly Income & Expenses'
-      }
+      title: { display: true, text: 'Monthly Income & Expenses' }
     },
     scales: {
-      y: {
-        beginAtZero: true,
-        title: { display: true, text: 'Amount ($)' }
-      },
-      x: {
-        title: { display: true, text: 'Month' }
-      }
+      y: { beginAtZero: true, title: { display: true, text: 'Amount ($)' } },
+      x: { title: { display: true, text: 'Month' } }
     }
   };
 
   const lineCtx = document.getElementById('myChart').getContext('2d');
-  const myLineChart = new Chart(lineCtx, {
-    type: 'line',
-    data: lineData,
-    options: lineOptions
-  });
+  const myLineChart = new Chart(lineCtx, { type: 'line', data: lineData, options: lineOptions });
 
   const pieData = {
     labels: ['Income', 'Expense'],
-    datasets: [{
-      label: 'My First Dataset',
-      data: [300, 50],
-      backgroundColor: [
-        'rgb(75, 192, 192)',
-        'rgb(255, 99, 132)'
-      ],
-      hoverOffset: 4
-    }]
+    datasets: [{ label: 'Totals', data: [0, 0], backgroundColor: ['rgb(75, 192, 192)', 'rgb(255, 99, 132)'], hoverOffset: 4 }]
   };
   const pieCtx = document.getElementById('myPieChart').getContext('2d');
-  const myPieChart = new Chart(pieCtx, {
-    type: 'pie',
-    data: pieData
+  const myPieChart = new Chart(pieCtx, { type: 'pie', data: pieData });
+
+  /* load categories: preserve user-typed value if possible */
+async function loadCategories(kind) {
+  try {
+    const res = await fetch(`/api/categories?kind=${encodeURIComponent(kind)}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    const dataList = document.getElementById('txCategoryList');
+    const input = document.getElementById('txCategory');
+    const limitInput = document.getElementById('txCategoryLimit');
+    const previous = (input.value || '').trim();
+    const previousLimit = (limitInput && limitInput.value) ? limitInput.value : '';
+    dataList.innerHTML = '';
+
+    const names = Array.isArray(data.categories) ? data.categories.map(c => c.name) : [];
+    names.forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      dataList.appendChild(opt);
+    });
+
+    // Preserve previous if it exists or if it is one of the fetched names.
+    if (previous) {
+      // keep user input (even if not in list) so they don't lose typing
+      input.value = previous;
+      if (previousLimit) limitInput.value = previousLimit;
+    } else if (names.length > 0) {
+      input.value = names[0]; // default only when input empty
+      // If server returned a matching category, set its budgetLimit if available
+      const matched = data.categories.find(c => c.name === input.value);
+      if (matched && typeof matched.budgetLimit !== 'undefined' && limitInput) limitInput.value = matched.budgetLimit;
+    } else {
+      input.value = '';
+      if (limitInput) limitInput.value = '';
+    }
+  } catch (err) {
+    console.error('Failed to load categories', err);
+  }
+}
+
+/* load dashboard and augment with category limits map for spendings display */
+async function loadDashboardSummary() {
+  try {
+    const res = await fetch('/api/dashboard');
+    if (!res.ok) return;
+    const body = await res.json();
+    const summary = body.summary || {};
+    document.getElementById('totalIncome').textContent = (summary.totalIncome || 0).toFixed(2);
+    document.getElementById('totalExpense').textContent = (summary.totalExpenses || 0).toFixed(2);
+    document.getElementById('remainingBudget').textContent = (summary.netSavings || 0).toFixed(2);
+
+    // fetch user's expense categories to read budgetLimit
+    const catRes = await fetch('/api/categories?kind=expense');
+    const catData = catRes.ok ? await catRes.json() : { categories: [] };
+    const limitMap = {};
+    (catData.categories || []).forEach(c => limitMap[c.name] = c.budgetLimit || 0);
+
+    const grid = document.getElementById('spendingsGrid');
+    grid.innerHTML = '';
+
+    if (Array.isArray(body.budgets) && body.budgets.length) {
+      body.budgets.slice(0,6).forEach(b => {
+        const col = document.createElement('div');
+        col.className = 'col-md-6 mb-2';
+        const remaining = (b.amount || 0) - (b.spent || 0);
+        col.innerHTML = `
+          <div class="p-3 rounded h-100" style="background:#f1f5f9;">
+            <h6 class="mb-1">${b.categoryId?.name || 'Category'}</h6>
+            <div class="h4 mb-1">$${(b.spent || 0).toFixed(2)}</div>
+            <small class="text-muted">Budget: $${(b.amount || 0).toFixed(2)} • Remaining: $${(remaining).toFixed(2)}</small>
+          </div>
+        `;
+        grid.appendChild(col);
+      });
+    } else if (Array.isArray(body.categoryBreakdown) && body.categoryBreakdown.length) {
+      const expenses = body.categoryBreakdown.filter(c=>c.type==='expense').sort((a,b)=>b.total-a.total).slice(0,6);
+      expenses.forEach(e => {
+        const limit = limitMap[e.categoryName] || 0;
+        const col = document.createElement('div');
+        col.className = 'col-md-6 mb-2';
+        col.innerHTML = `
+          <div class="p-3 rounded h-100" style="background:#fef2f2;">
+            <h6 class="mb-1">${e.categoryName}</h6>
+            <div class="h4 mb-1">$${(e.total || 0).toFixed(2)}</div>
+            <small class="text-muted">${e.count || 0} transactions${limit ? ' • Limit: $' + limit.toFixed(2) : ''}</small>
+          </div>
+        `;
+        grid.appendChild(col);
+      });
+    } else {
+      grid.innerHTML = '<div class="col-12 text-muted">No spending data yet</div>';
+    }
+  } catch (err) {
+    console.error('loadDashboardSummary error', err);
+  }
+}
+
+/* modal open: prefill date and preserve category by default */
+document.addEventListener('DOMContentLoaded', () => {
+  const typeSelect = document.getElementById('txType');
+  typeSelect.addEventListener('change', () => loadCategories(typeSelect.value));
+
+  // When opening the Add Transaction modal, prefill date and keep current category if any
+  const openBtn = document.getElementById('openAddTxBtn');
+  if (openBtn) {
+    openBtn.addEventListener('click', () => {
+      const dateInput = document.getElementById('txDate');
+      const today = new Date().toISOString().slice(0,10);
+      if (!dateInput.value) dateInput.value = today;
+      // ensure categories are loaded for selected kind without overwriting user-typed value
+      loadCategories(document.getElementById('txType').value);
+      // remove any edit id when creating new
+      const form = document.getElementById('txForm');
+      form.removeAttribute('data-tx-id');
+      // clear category limit for new tx by default
+      const limitInput = document.getElementById('txCategoryLimit');
+      if (limitInput) limitInput.value = '';
+    });
+  }
+
+  // keep txCategory value across modal hide (do not wipe user selection)
+  document.getElementById('addTransaction').addEventListener('hidden.bs.modal', () => {
+    const form = document.getElementById('txForm');
+    // preserve category value
+    const categoryInput = document.getElementById('txCategory');
+    const preserved = categoryInput.value;
+    const limitInput = document.getElementById('txCategoryLimit');
+    const preservedLimit = limitInput ? limitInput.value : '';
+    form.removeAttribute('data-tx-id');
+    form.reset();
+    categoryInput.value = preserved; // put back the category text
+    if (limitInput) limitInput.value = preservedLimit;
+    // reload categories for selected type
+    loadCategories(document.getElementById('txType').value);
   });
+
+    // initial loads
+    loadCategories(typeSelect.value);
+    loadTransactions();
+    loadDashboardSummary();
+
+    document.getElementById('txForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.currentTarget;
+      const txId = form.dataset.txId;
+      const payload = {
+        categoryName: document.getElementById('txCategory').value,
+        budgetLimit: parseFloat(document.getElementById('txCategoryLimit').value) || undefined,
+        type: document.getElementById('txType').value,
+        amount: parseFloat(document.getElementById('txAmount').value),
+        description: document.getElementById('txDesc').value,
+        date: document.getElementById('txDate').value
+      };
+
+      try {
+        let res;
+        if (txId) {
+          res = await fetch(`/api/transactions/${txId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        } else {
+          res = await fetch('/api/transactions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        }
+
+        if (res.ok) {
+          const modalEl = document.getElementById('addTransaction');
+          const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+          modal.hide();
+          form.removeAttribute('data-tx-id');
+          await loadCategories(payload.type);
+          await loadTransactions();
+          await loadDashboardSummary();
+        } else {
+          const json = await res.json().catch(()=>({message:'error'}));
+          alert('Error: ' + (json.message || json.error || 'Unable to save'));
+        }
+      } catch (err) {
+        console.error('Submit error', err);
+        alert('An error occurred while saving transaction');
+      }
+    });
+
+    // clear form dataset and reset on modal hide
+    document.getElementById('addTransaction').addEventListener('hidden.bs.modal', () => {
+      const form = document.getElementById('txForm');
+      form.removeAttribute('data-tx-id');
+      form.reset();
+      loadCategories(document.getElementById('txType').value);
+    });
+  });
+
+// update loadTransactions to show "no transactions" message and debug failures
+async function loadTransactions() {
+  try {
+    const res = await fetch('/api/transactions', { credentials: 'same-origin' });
+    if (!res.ok) {
+      console.warn('Failed to fetch /api/transactions, status:', res.status);
+      const listEl = document.getElementById('transactionsList');
+      listEl.innerHTML = '<div class="text-muted p-3">Unable to load transactions — are you logged in?</div>';
+      return;
+    }
+
+    const data = await res.json().catch(err => {
+      console.error('Failed to parse transactions JSON', err);
+      return null;
+    });
+    if (!data) {
+      document.getElementById('transactionsList').innerHTML = '<div class="text-muted p-3">No transactions available</div>';
+      return;
+    }
+
+    const txs = Array.isArray(data) ? data : (data.transactions || []);
+    const list = document.getElementById('transactionsList');
+    list.innerHTML = '';
+
+    if (!txs.length) {
+      list.innerHTML = '<div class="text-muted p-3">No transactions yet. Use "Add Transaction" to create one.</div>';
+      return;
+    }
+
+    txs.forEach(tx => {
+      const item = document.createElement('div');
+      item.className = 'list-group-item d-flex justify-content-between align-items-center';
+      const txId = tx._id || tx.id;
+      item.innerHTML = `
+        <div>
+          <div class="d-flex">
+            <span class="font-weight-bold me-3">${tx.categoryId?.name || 'Uncategorized'}</span>
+            <span class="text-muted">${tx.description || ''}</span>
+          </div>
+          <div class="row"><span class="text-muted">${new Date(tx.date).toLocaleDateString()}</span></div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="${tx.type === 'expense' ? 'text-danger' : 'text-success'} font-weight-bold me-2">
+            ${tx.type === 'expense' ? '-' : ''}${tx.amount}
+          </span>
+          <button class="btn btn-sm btn-outline-primary" data-action="edit" data-id="${txId}">Edit</button>
+          <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${txId}">Delete</button>
+        </div>
+      `;
+      list.appendChild(item);
+    });
+
+    // attach handlers (implemented)
+    list.querySelectorAll('button[data-action]').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const action = btn.getAttribute('data-action');
+        const id = btn.getAttribute('data-id');
+
+        if (action === 'delete') {
+          if (!confirm('Delete this transaction?')) return;
+          try {
+            const del = await fetch(`/api/transactions/${id}`, {
+              method: 'DELETE',
+              credentials: 'same-origin'
+            });
+            if (del.ok) {
+              // refresh after delete
+              await loadTransactions();
+              await loadDashboardSummary();
+              await loadCategories(document.getElementById('txType').value);
+            } else {
+              const errBody = await del.json().catch(()=>({}));
+              alert('Failed to delete: ' + (errBody.error || del.statusText));
+            }
+          } catch (err) {
+            console.error('Delete failed', err);
+            alert('Delete request failed. See console.');
+          }
+          return;
+        }
+
+        if (action === 'edit') {
+          // find transaction in the loaded list
+          const tx = txs.find(t => (t._id || t.id) === id);
+          if (!tx) {
+            alert('Transaction not found in current view');
+            return;
+          }
+          // populate modal fields including category limit (if available)
+          document.getElementById('txType').value = tx.type || 'expense';
+          await loadCategories(document.getElementById('txType').value);
+          document.getElementById('txCategory').value = tx.categoryId?.name || '';
+          // try to set category limit if category has it
+          if (tx.categoryId && typeof tx.categoryId.budgetLimit !== 'undefined') {
+            const limitEl = document.getElementById('txCategoryLimit');
+            if (limitEl) limitEl.value = tx.categoryId.budgetLimit;
+          }
+          document.getElementById('txAmount').value = tx.amount;
+          document.getElementById('txDesc').value = tx.description || '';
+          document.getElementById('txDate').value = new Date(tx.date).toISOString().slice(0,10);
+          document.getElementById('txForm').dataset.txId = id;
+          const modal = new bootstrap.Modal(document.getElementById('addTransaction'));
+          modal.show();
+        }
+      });
+    });
+
+    // update charts (existing aggregation code)...
+    {
+      const incomeTotals = new Array(12).fill(0);
+      const expenseTotals = new Array(12).fill(0);
+      const labelMonths = xValues;
+      txs.forEach(tx => {
+        const date = tx.date ? new Date(tx.date) : new Date();
+        const monthName = monthNames[date.getMonth()];
+        const pos = labelMonths.indexOf(monthName);
+        if (pos === -1) return;
+        const amt = Number(tx.amount) || 0;
+        if (tx.type === 'income') incomeTotals[pos] += amt;
+        else expenseTotals[pos] += amt;
+      });
+      myLineChart.data.datasets[0].data = expenseTotals;
+      myLineChart.data.datasets[1].data = incomeTotals;
+      myLineChart.update();
+      const totalIncome = incomeTotals.reduce((s, v) => s + v, 0);
+      const totalExpense = expenseTotals.reduce((s, v) => s + v, 0);
+      myPieChart.data.datasets[0].data = [totalIncome, totalExpense];
+      myPieChart.update();
+    }
+
+  } catch (err) {
+    console.error('loadTransactions error', err);
+    const listEl = document.getElementById('transactionsList');
+    listEl.innerHTML = '<div class="text-danger p-3">Error loading transactions. Check console for details.</div>';
+  }
+}
+
+// Auto-refresh configuration
+const AUTO_REFRESH_MS = 30_000; // 30 seconds
+let autoRefreshId = null;
+
+function setAutoButtonState(running) {
+  const btn = document.getElementById('autoRefreshBtn');
+  const icon = document.getElementById('autoRefreshIcon');
+  if (!btn || !icon) return;
+  if (running) {
+    btn.classList.remove('btn-outline-info');
+    btn.classList.add('btn-info');
+    icon.classList.remove('bi-play-fill');
+    icon.classList.add('bi-pause-fill');
+    btn.title = 'Stop auto-refresh';
+  } else {
+    btn.classList.remove('btn-info');
+    btn.classList.add('btn-outline-info');
+    icon.classList.remove('bi-pause-fill');
+    icon.classList.add('bi-play-fill');
+    btn.title = 'Start auto-refresh';
+  }
+}
+
+function startAutoRefresh() {
+  if (autoRefreshId) return; // already running
+  // immediate refresh then schedule
+  (async () => {
+    try {
+      await loadCategories(document.getElementById('txType').value);
+      await loadTransactions();
+      await loadDashboardSummary();
+    } catch (err) {
+      console.error('Auto-refresh first run failed', err);
+    }
+  })();
+  autoRefreshId = setInterval(async () => {
+    try {
+      await loadTransactions();
+      await loadDashboardSummary();
+    } catch (err) {
+      console.error('Auto-refresh failed', err);
+    }
+  }, AUTO_REFRESH_MS);
+  setAutoButtonState(true);
+}
+
+function stopAutoRefresh() {
+  if (!autoRefreshId) return;
+  clearInterval(autoRefreshId);
+  autoRefreshId = null;
+  setAutoButtonState(false);
+}
+
+// Toggle auto-refresh via the Auto button
+(function bindAutoRefreshButton() {
+  const btn = document.getElementById('autoRefreshBtn');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    if (autoRefreshId) stopAutoRefresh();
+    else startAutoRefresh();
+  });
+})();
+
+// Optional: start auto-refresh automatically on page load
+// startAutoRefresh(); // uncomment if you want auto to start by default
+
+// refresh button wiring — bind immediately (script is at page bottom so DOM elements exist)
+(function() {
+  const refreshBtn = document.getElementById('refreshBtn');
+  if (!refreshBtn) return;
+
+  const originalHtml = refreshBtn.innerHTML;
+  refreshBtn.addEventListener('click', async () => {
+    try {
+      refreshBtn.disabled = true;
+      refreshBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Refreshing';
+      await loadCategories(document.getElementById('txType').value);
+      await loadTransactions();
+      await loadDashboardSummary();
+    } catch (err) {
+      console.error('Refresh failed:', err);
+      alert('Refresh failed — check console for details.');
+    } finally {
+      refreshBtn.disabled = false;
+      refreshBtn.innerHTML = originalHtml;
+    }
+  });
+})();
 </script>
 
 </html>

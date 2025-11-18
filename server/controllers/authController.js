@@ -140,7 +140,7 @@ async function register(req, res) {
             error: null,
             message: 'Registration successful! Please login.',
             showFacebook: !!process.env.FACEBOOK_APP_ID,
-            showGoogle: !!process.env.GOOGLE_CLIENT_SECRET
+            showGoogle: !!process.env.GOOGLE_CLIENT_ID
         });
     } catch (err) {
         console.error('Registration error:', err);
