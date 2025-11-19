@@ -120,10 +120,10 @@ npm start
    * UI Elements: Registration from with fields for username, email, password, confirm password or with social links (facebook or google)
 2. Form Submission
    * Provide required information:
-     * Username (3-30 characters)
-     * Email (valid format required)
-     * Password (8+ characters)
-     * Confirm Password
+       * Username (3-30 characters)
+       * Email (valid format required)
+       * Password (8+ characters)
+       * Confirm Password
    * Submit form → Automatic redirect to login page
 
 ### Login Process
@@ -132,11 +132,11 @@ npm start
     * UI Elements: Login form with multiple authentication options
 2. Authentication Methods
    * Local Login:
-    * Enter username/email + password
-    * Click "Login" button
+       * Enter username/email + password
+       * Click "Login" button
    * Social Login
-    * Click "Login with Facebook" button
-    * Click "Login with Google" button
+       * Click "Login with Facebook" button
+       * Click "Login with Google" button
 3. Successful Login
    * Redirect: Automatically to dashboard
    * Session: User session established
@@ -174,8 +174,8 @@ npm start
    * Direct Access: Navigate to Quick Actions section
 2. Form Completion
    * UI Elements:
-    * Type selection (Dropdown Menu: Expense or Income)
-    * Category creation (User defined then stored into scrolling menu) - unique to each user
+       * Type selection (Dropdown Menu: Expense or Income)
+       * Category creation (User defined then stored into scrolling menu) - unique to each user
     * Category limit (optional and can be typed in or defined using increament or decrement button)
     * Amount (Typed or defined using increament or decrement button)
     * Description (String field)
@@ -192,12 +192,12 @@ npm start
 1. Access Transaction History list
    * UI Elements: Recent Transaction section
    * Features:
-    * Sort by date
-    * Filter by type (Income/Expense) 
+       * Sort by date
+       * Filter by type (Income/Expense) 
 2. Transaction Details
    * Displayed Information:
-    * Full transaction details
-    * Category information
+       * Full transaction details
+       * Category information
 
 ### Update Transaction
 1. Access Edit Mode
@@ -233,9 +233,9 @@ npm start
 ### Monitor Budget Progress
 1. View Budget Dashboard
    * UI Elements:
-    * Tracking budget limit for each category
-    * Spending vs budget comparison
-    * Visual indicator (colors for over/under budget)
+       * Tracking budget limit for each category
+       * Spending vs budget comparison
+       * Visual indicator (colors for over/under budget)
    * Access: Main dashboard
    
 ### Financial Insights
