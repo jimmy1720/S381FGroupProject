@@ -1,216 +1,289 @@
 # Budget Tracker - Web Application
 
-## 1. Project Information
-**Project Name**: Budget Tracker  
-**Group**: Grp 16  
-### Team Members:
+## 📋 Project Overview
+
+Budget Tracker is a comprehensive web application designed to help users manage their personal finances effectively. The application provides intuitive tools for tracking income and expenses, categorizing transactions, and monitoring budget goals.
+
+**Live Application:** 🌐 [Budget Tracker](https://budget-tracker-grp16-s381f.onrender.com)
+
+## 👥 Team Members
+
 - Alan ([Student 1 SID])
-- Abel (13032428) 
+- Abel (13032428)
 - Ashwin-Sundar (13139477)
 - Thomas (13035781)
 - Jimmy (13030411)
 
-## 2. Project File Structure
+## 🏗️ System Architecture
 
-### Server (`/server/`)
-#### `app.js` - Main Application File
-- **Purpose**: Central controller that coordinates all application components
-- **Functionality**: 
-  - Starts Express server and handles HTTP requests
-  - Configures middleware (sessions, authentication, parsing)
-  - Manages database connection with MongoDB
-  - Implements Passport.js authentication strategies
-  - Coordinates Facebook & Google OAuth integration
-  - Routes requests to appropriate handlers
-  - Serves static files and EJS templates
+### Tech Stack
 
-#### `package.json` - Dependencies Management
-**Core Dependencies:**
-- `express` - Web framework for routing and middleware
-- `mongoose` - MongoDB object modeling and database operations
-- `bcrypt` - Password hashing and security
-- `passport` - Authentication middleware
-- `passport-facebook` - Facebook OAuth integration
-- `passport-google-oauth20` - Google OAuth integration
-- `express-session` - User session management
-- `connect-mongodb-session` - Session storage in MongoDB
-- `dotenv` - Environment variable management
-- `ejs` - Template engine for dynamic views
-- `morgan` - HTTP request logging
+- **Backend:** Node.js, Express.js
+- **Database:** MongoDB with Mongoose ODM
+- **Authentication:** Passport.js (Local, Facebook, Google OAuth)
+- **Frontend:** EJS Templates, CSS3
+- **Session Management:** Express-session with MongoDB storage
+- **Security:** bcrypt for password hashing
 
-#### Models (`/server/models/`)
-- `User.js` - User accounts and authentication
-  - Local & OAuth user management
-  - Password hashing and validation
-  - Session and profile data
-- `Transaction.js` - Financial transactions
-  - Income and expense records
-  - Category association
-  - User ownership and tracking
-- `BudgetCategory.js` - Budget organization
-  - Custom spending categories
-  - Budget limits and tracking
-  - User-specific organization
+### Project Structure
 
-#### Routes (`/server/routes/`)
-- `authRoutes.js` - Authentication endpoints (login, register, logout, OAuth)
-- Additional CRUD routes for transactions and budgets
+```
+Budget_Tracker/
+├── server/
+│   ├── models/          # Database models
+│   │   ├── User.js
+│   │   ├── Transaction.js
+│   │   ├── Budget.js
+│   │   └── BudgetCategory.js  
+│   ├── routes/          # API routes
+│   │   ├── authRoutes.js
+│   │   ├── PublicApi.js
+│   │   ├── budgetRoutes.js
+│   │   ├── categoryRoutes.js
+│   │   ├── transactionRoutes.js
+│   │   ├── dashboardRoutes.js
+│   │   └── apiRoutes.js
+│   ├── controllers/     # Business logic
+│   │   ├── authController.js
+│   │   ├── budgetController.js
+│   │   ├── categoryController.js
+│   │   ├── dashboardController.js
+│   │   ├── passwordController.js
+│   │   └── transactionController.js
+│   ├── middleware/      # Custom middleware
+│   │   └── authMiddleware.js
+│   ├── config/          # Configuration files
+│   │   └── db.js
+│   └── app.js          # Main application file
+└── client/
+    ├── public/          # Static assets
+    │   └── css/
+    │       └── styles.css
+    └── views/           # EJS templates
+        ├── index.ejs
+        ├── login.ejs
+        ├── register.ejs
+        ├── dashboard.ejs
+        ├── profile.ejs
+        ├── settings.ejs
+        └── 404.ejs
+```
 
-#### Controllers (`/server/controllers/`)
-- `authController.js` - Business logic for authentication
-- Additional controllers for transaction and budget operations
+## 🚀 Quick Start
 
-#### Middleware (`/server/middleware/`)
-- `authMiddleware.js` - Authentication and session validation
-- `validationMiddleware.js` - Input validation and sanitization
+### Prerequisites
 
-#### Config (`/server/config/`)
-- `db.js` - Database connection configuration and management
+- Node.js (v14 or higher)
+- MongoDB Atlas account
+- (Optional) Facebook/Google OAuth apps for social login
 
-### Client (`/client/`)
-#### Public (`/client/public/`)
-- `css/styles.css` - Application styling and responsive design
-- Additional static assets (images, client-side JavaScript)
+### Installation & Setup
 
-#### Views (`/client/views/`)
-- `index.ejs` - Homepage and landing
-- `login.ejs` - User authentication with OAuth options
-- `register.ejs` - New user registration
-- `dashboard.ejs` - Main application interface (protected)
-- `profile.ejs` - User profile management
-- `settings.ejs` - Application settings
-- `404.ejs` - Custom error page
+```bash
+# 1. Clone the repository
+git clone https://github.com/jimmy1720/S381FGroupProject.git
+cd Budget_Tracker
 
-## 3. Cloud-Based Server URL
-**Live Application**: [Deployed URL Here]
+# 2. Install dependencies
+cd server
+npm install
 
-## 4. Operation Guides
+# 3. Environment configuration
+# Create a .env file with the following variables:
+# MONGODB_URI=your_mongodb_connection_string
+# SESSION_SECRET=your_session_secret
+# FACEBOOK_APP_ID=your_facebook_app_id
+# FACEBOOK_APP_SECRET=your_facebook_app_secret
+# GOOGLE_CLIENT_ID=your_google_client_id
+# GOOGLE_CLIENT_SECRET=your_google_client_secret
 
-### User Authentication Flow
+# 4. Start the application
+npm start
 
-#### Registration Process:
-1. **Navigate to**: `/register`
-2. **Required Information**:
+# 5. Access the application
+# Open http://localhost:8099 in your browser
+```
+
+## 🔑 Authentication & Security
+
+### Registration Process
+
+1. Navigate to `/register`
+2. Provide required information:
    - Username (3-30 characters)
    - Email (valid format required)
    - Password (8+ characters)
    - Confirm Password
-3. **Submit Form** → Automatic redirect to login page
+3. Submit form → Automatic redirect to login page
 
-#### Login Process:
-1. **Navigate to**: `/login`
-2. **Authentication Methods**:
-   - **Local Login**: Username/Email + Password
-   - **Facebook Login**: OAuth integration (when configured)
-   - **Google Login**: OAuth integration (when configured)
-3. **Successful Login** → Redirect to `/dashboard`
+### Login Options
 
-#### Test Accounts:
-Username: TBD
-Email: TBD
-Password: TBD
+- Local Authentication: Username/Email + Password
+- Facebook OAuth: Social login integration
+- Google OAuth: Social login integration
 
-### CRUD Operations
+### Security Features
 
-#### Transactions Management:
-- **Create**: Add new income/expense transactions
-- **Read**: View transaction history and summaries  
-- **Update**: Modify existing transaction details
-- **Delete**: Remove transactions from records
+- Password hashing with bcrypt
+- Session management with MongoDB storage
+- Protected route middleware
+- Input validation and sanitization
 
-#### Budget Categories:
-- **Create**: Define custom spending categories
-- **Read**: View category budgets and spending
-- **Update**: Adjust budget limits and names
-- **Delete**: Remove unused categories
+## 📊 Core Features
 
-### RESTful API Endpoints
+### Transaction Management
 
-#### Authentication APIs:
-```http
-POST /register          # Create new user account
-POST /login             # User login
-GET  /logout            # User logout
-GET  /auth/facebook     # Facebook OAuth
-GET  /auth/google       # Google OAuth
-GET  /user/info         # Get current user information
+- ✅ Create income and expense transactions
+- ✅ Read transaction history with filtering
+- ✅ Update existing transaction details
+- ✅ Delete transactions
+- ✅ Categorize transactions
+
+### Budget Categories
+
+- ✅ Create custom spending categories
+- ✅ Set budget limits per category
+- ✅ Track spending against budgets
+- ✅ Visual budget progress indicators
+
+### Financial Insights
+
+- 📈 Income vs Expense overview
+- 🏷️ Category-wise spending analysis
+- 📅 Time-period filtering
+- 💰 Net balance tracking
+
+## 🔌 RESTful API Reference
+
+### Transaction API Endpoints
+
+```
+GET    /public/api/transactions          # Get all transactions
+POST   /public/api/transactions          # Create new transaction
+PUT    /public/api/transactions/:id      # Update transaction
+DELETE /public/api/transactions/:id      # Delete transaction
 ```
 
-### CURL Testing Commands:
+## 🛠️ API Testing with cURL
 
-### User Registration:
+### Transaction Operations
+
+1. **Get All Transactions**
+
 ```bash
-curl -X POST http://localhost:8099/register \
+curl -X GET https://budget-tracker-grp16-s381f.onrender.com/public/api/transactions
+```
+
+2. **Create a New Transaction**
+
+```bash
+curl -X POST https://budget-tracker-grp16-s381f.onrender.com/public/api/transactions \
   -H "Content-Type: application/json" \
-  -d '{"username":"testuser","email":"test@example.com","password":"password123","confirm_password":"password123"}'
+  -d '{
+    "amount": 100,
+    "type": "expense",
+    "categoryName": "Food",
+    "description": "Groceries",
+    "date": "2024-01-15"
+  }'
 ```
-### User Login
+
+3. **Update a Transaction**
+
 ```bash
-curl -X POST http://localhost:8099/login \
+curl -X PUT https://budget-tracker-grp16-s381f.onrender.com/public/api/transactions/[ID] \
   -H "Content-Type: application/json" \
-  -d '{"username":"testuser","password":"password123"}'
+  -d '{
+    "amount": 150,
+    "description": "Lunch with friends",
+    "categoryName": "Dining"
+  }'
 ```
-### Get User Info
+
+4. **Delete a Transaction**
+
 ```bash
-curl -X GET http://localhost:8099/user/info \
-  -H "Cookie: [session-cookie-from-login]"
+curl -X DELETE https://budget-tracker-grp16-s381f.onrender.com/public/api/transactions/[ID]
 ```
 
-## 5. Setup & Installation
+## Getting Started
 
-### Prerequisites:
-* Node.js(v14 or higher)
-* MongoDB Atlas account
-* (Optional) Facebook/Google OAuth apps
+1. Register a new account or use existing test credentials
+2. Login to access your personal dashboard
+3. Add Transactions using the form or API
+4. Create Budget Categories to organize spending
+5. Monitor Progress through the dashboard analytics
 
-### Quick Start:
-```bash
-# 1. Clone repository
-git clone [repository-url]
-cd Budget_Tracker
+### Test Accounts
 
-# 2. Install server dependencies
-cd server
-npm install
+- **Username:** demo_user
+- **Email:** demo@example.com
+- **Password:** demo123
 
-# 3. Start application
-npm start
+## 🔄 Development Status
 
-# 4. Access application
-# Open http://localhost:8099 in browser
-```
-### Environment Configuration
-This included `.env` file contains:
-* MongDB connection string
-* Session secret Key
-* OAuth credentials (Facebook/Google - optional)
+### ✅ Completed Features
 
-## 6. Development Notes
+- User registration and authentication
+- Session management with MongoDB storage
+- Password security with bcrypt hashing
+- EJS templating and dynamic views
+- Protected route middleware
+- OAuth infrastructure (Facebook & Google)
+- Transaction CRUD operations
+- RESTful API endpoints
+- Error handling and validation
 
-### Architecture Pattern:
-MVC Structure:
-📱 User Request → 
-🛣️ Routes (routes/) → 
-👨‍💼 Controllers (controllers/) → 
-💾 Models (models/) → 
-🗄️ Database (MongoDB)
+## 🐛 Troubleshooting
 
-## Features Implemented:
-* ✅ User registration & authentication
-* ✅ Session management with MongoDB storage
-* ✅ Password security with bcrypt hashing
-* ✅ EJS templating and dynamic views
-* ✅ Protected route middleware
-* ✅ OAuth infrastructure (ready for credentials)
-* ✅ Error handling and validation
+### Common Issues
 
-## Features Planned:
-* 🔄 Transaction CRUD operations
-* 🔄 Budget category management
-* 🔄 Financial reporting and analytics
-* 🔄 Data visualization charts
-* 🔄 Export functionality
+- **Database Connection Error**
+  - Verify MongoDB connection string in .env
+  - Check network connectivity to MongoDB Atlas
 
-Last Updated: [10-11-2025]
-Version: 1.0.0
-Status Developement - Core Authentication Complete
+- **Session Not Persisting**
+  - Ensure session secret is set in .env
+  - Verify MongoDB session store configuration
+
+- **OAuth Login Failures**
+  - Check OAuth app credentials in .env
+  - Verify callback URLs in OAuth provider settings
+
+### Debug Mode
+
+Enable debug logging by setting `DEBUG=true` in your .env file for detailed application logs.
+
+## 🤝 Contributing
+
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Code Standards
+
+- Follow ESLint configuration
+- Write meaningful commit messages
+- Include API documentation for new endpoints
+- Test all endpoints with cURL commands
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE.md file for details.
+
+## 📞 Support
+
+For support and questions:
+
+- Create an issue in the repository
+- Contact the development team via university channels
+
+**Last Updated:** November 2024  
+**Version:** 1.0.0  
+**Status:** Production Ready - Core Features Complete
+
+**Built with ❤️ by Group 16**
