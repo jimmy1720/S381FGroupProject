@@ -1,33 +1,31 @@
-// models/Budget.js
 const mongoose = require('mongoose');
 
 const budgetSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // Reference to the User model
+        ref: 'User',
         required: true
     },
     categoryId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'BudgetCategory', // Reference to the category this budget applies to
+        ref: 'BudgetCategory',
         required: true
     },
     amount: {
         type: Number,
         required: true,
-        min: 0 // Budget amount must be non-negative
+        min: 0
     },
     period: {
         type: String,
-        enum: ['monthly', 'yearly'], // Budget resets monthly or yearly
+        enum: ['monthly', 'yearly'],
         required: true
     },
     startDate: {
         type: Date,
-        required: true // When this budget period begins
+        required: true
     }
-}, { timestamps: true }); // Automatically manage createdAt and updatedAt
+}, { timestamps: true });
 
-// Explicitly specify the collection name as "budgets"
 const Budget = mongoose.model('Budget', budgetSchema, 'budgets');
 module.exports = Budget;
