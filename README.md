@@ -8,7 +8,7 @@ Budget Tracker is a comprehensive web application designed to help users manage 
 
 ## 👥 Team Members
 
-- Alan ([Student 1 SID])
+- Alan (13557386)
 - Abel (13032428)
 - Ashwin-Sundar (13139477)
 - Thomas (13035781)
