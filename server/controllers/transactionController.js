@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Transaction = require('../models/Transaction');
 const BudgetCategory = require('../models/BudgetCategory');
 const logger = require('../utils/logger');
+const Budget = require('../models/Budget');
 
 // Create new transaction
 async function createTransaction(req, res) {
