@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const Transaction = require('../models/Transaction');
-const Budget = require('../models/Budget');
 const BudgetCategory = require('../models/BudgetCategory');
 
 // Get dashboard summary with budget tracking
