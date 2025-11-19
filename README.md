@@ -364,4 +364,4 @@ For support and questions:
 **Version:** 1.0.0  
 **Status:** Production Ready - Core Features Complete
 
-**Built with ❤️ by Group 16**
+**Built by Group 16**
