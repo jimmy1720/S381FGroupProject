@@ -176,10 +176,10 @@ npm start
    * UI Elements:
        * Type selection (Dropdown Menu: Expense or Income)
        * Category creation (User defined then stored into scrolling menu) - unique to each user
-    * Category limit (optional and can be typed in or defined using increament or decrement button)
-    * Amount (Typed or defined using increament or decrement button)
-    * Description (String field)
-    * Date picker
+       * Category limit (optional and can be typed in or defined using increament or decrement button)
+       * Amount (Typed or defined using increament or decrement button)
+       * Description (String field)
+       * Date picker
    * Action: Click "Save" button
 3. Result
    * Transaction added to database 
