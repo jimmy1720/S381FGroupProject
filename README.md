@@ -104,23 +104,59 @@ npm start
 # Open http://localhost:8099 in your browser
 ```
 
-## 🔑 Authentication & Security
+## Getting Started
+
+1. Register a new account or use existing test credentials
+2. Login to access your personal dashboard
+3. Add Transactions using the form or API
+4. Create Budget Categories to organize spending
+5. Monitor Progress through the dashboard analytics
+
+## 🔑 Authentication Flow & Security
 
 ### Registration Process
-
 1. Navigate to `/register`
-2. Provide required information:
-   - Username (3-30 characters)
-   - Email (valid format required)
-   - Password (8+ characters)
-   - Confirm Password
-3. Submit form → Automatic redirect to login page
+   * Navigate to: [https://budget-tracker-grp16-s381f.onrender.com/register](https://budget-tracker-grp16-s381f.onrender.com/register)
+   * UI Elements: Registration from with fields for username, email, password, confirm password or with social links (facebook or google)
+2. Form Submission
+   * Provide required information:
+     * Username (3-30 characters)
+     * Email (valid format required)
+     * Password (8+ characters)
+     * Confirm Password
+   * Submit form → Automatic redirect to login page
 
-### Login Options
+### Login Process
+1. Access Login Page
+    * Navigate to: [https://budget-tracker-grp16-s381f.onrender.com/login](https://budget-tracker-grp16-s381f.onrender.com/login)
+    * UI Elements: Login form with multiple authentication options
+2. Authentication Methods
+   * Local Login:
+    * Enter username/email + password
+    * Click "Login" button
+   * Social Login
+    * Click "Login with Facebook" button
+    * Click "Login with Google" button
+3. Successful Login
+   * Redirect: Automatically to dashboard
+   * Session: User session established
+   * UI Update: Navigation bar shows user menu
 
-- Local Authentication: Username/Email + Password
-- Facebook OAuth: Social login integration
-- Google OAuth: Social login integration
+### Login Process
+1. Access Logout
+   * UI Element: Top-right logout button in navbar or in settings page
+   * Action: Click "Logout"
+   * Results: Session destroyed, redirect to Index page
+
+### Test Credentials
+```
+**Local Account:**
+- Username: `demo_user` or Email: `demo@example.com`
+- Password: `demo123`
+
+**Social Accounts:**
+- Use any valid Facebook/Google account
+```
 
 ### Security Features
 
@@ -131,13 +167,61 @@ npm start
 
 ## 📊 Core Features
 
-### Transaction Management
+## Transaction Management Workflow
+### Create Transaction
+1. Navigation
+   * From Dashboard: Click "Add Transaction" button
+   * Direct Access: Navigate to Quick Actions section
+2. Form Completion
+   * UI Elements:
+    * Type selection (Dropdown Menu: Expense or Income)
+    * Category creation (User defined then stored into scrolling menu) - unique to each user
+    * Category limit (optional and can be typed in or defined using increament or decrement button)
+    * Amount (Typed or defined using increament or decrement button)
+    * Description (String field)
+    * Date picker
+   * Action: Click "Save" button
+3. Result
+   * Transaction added to database 
+   * Recent transaction section updates with new transaction 
+   * Spending by Category updates only when a new expense is added with or without the category limit
+   * Quick Overview (includes line graph) and Monthly Expense Ratio updates
+  
 
-- ✅ Create income and expense transactions
-- ✅ Read transaction history with filtering
-- ✅ Update existing transaction details
-- ✅ Delete transactions
-- ✅ Categorize transactions
+### Read/View Transactions
+1. Access Transaction History list
+   * UI Elements: Recent Transaction section
+   * Features:
+    * Sort by date
+    * Filter by type (Income/Expense) 
+2. Transaction Details
+   * Displayed Information:
+    * Full transaction details
+    * Category information
+
+### Update Transaction
+1. Access Edit Mode
+   * UI Element: "Edit" button on transaction row in Recent Transaction History
+2. Modify Data
+   * UI Elements: Pre-populated edit form
+   * Make changes to any field
+   * Action: Click "Save" button
+3. Result
+   * Transaction updated in database
+   * All related view updated automatically
+   * Buget calculation recalculated
+
+### Delete Transaction
+1. Initiate Deletion
+   * UI Element: "Delete" button on transaction row
+   * Alternative: Click transaction and select "Delete"
+2. Confirmation
+   * UI Element: Confirmation dialog
+   * Action: Confirm deletion
+3. Result
+   * Transaction removed from database
+   * Dashboard and budget views updated
+   * Budget progress recalculated
 
 ### Budget Categories
 
@@ -146,6 +230,14 @@ npm start
 - ✅ Track spending against budgets
 - ✅ Visual budget progress indicators
 
+### Monitor Budget Progress
+1. View Budget Dashboard
+   * UI Elements:
+    * Tracking budget limit for each category
+    * Spending vs budget comparison
+    * Visual indicator (colors for over/under budget)
+   * Access: Main dashboard
+   
 ### Financial Insights
 
 - 📈 Income vs Expense overview
@@ -205,20 +297,6 @@ curl -X PUT https://budget-tracker-grp16-s381f.onrender.com/public/api/transacti
 ```bash
 curl -X DELETE https://budget-tracker-grp16-s381f.onrender.com/public/api/transactions/[ID]
 ```
-
-## Getting Started
-
-1. Register a new account or use existing test credentials
-2. Login to access your personal dashboard
-3. Add Transactions using the form or API
-4. Create Budget Categories to organize spending
-5. Monitor Progress through the dashboard analytics
-
-### Test Accounts
-
-- **Username:** demo_user
-- **Email:** demo@example.com
-- **Password:** demo123
 
 ## 🔄 Development Status
 
