@@ -69,13 +69,9 @@
         } %>
 
         <% function currentTimeForGreeting() {
-            // Create date for Hong Kong time (UTC+8)
+            // Use server time as fallback, but client-side JS will update it
             const now = new Date();
-            const hongKongOffset = 8 * 60; // UTC+8 in minutes
-            const localOffset = now.getTimezoneOffset(); // in minutes
-            const hongKongTime = new Date(now.getTime() + (hongKongOffset + localOffset) * 60000);
-            
-            const hours = hongKongTime.getHours();
+            const hours = now.getHours();
             
             if (hours >= 6 && hours < 12) return 'morning'; // 6–11am
             else if (hours >= 12 && hours < 18) return 'afternoon'; // 12–5pm
@@ -143,7 +139,9 @@
                       const displayName = (user && user.displayName) ? user.displayName : (user && user.username) || '';
                       const showUsername = user && user.displayName && user.username && user.displayName.toLowerCase() !== user.username.toLowerCase();
                     %>
-                    <h2 class="card-title h4">Good <%= currentTimeForGreeting() %>, <%= properCase(displayName) %><%= showUsername ? ' (' + user.username + ')' : '' %>.</h2>
+                    <h2 class="card-title h4" id="greetingElement">
+                        Good <span id="timeGreeting"><%= currentTimeForGreeting() %></span>, <%= properCase(displayName) %><%= showUsername ? ' (' + user.username + ')' : '' %>.
+                    </h2>
                     <p class="card-text text-muted">Here is a quick overview of your budget and expenses.</p>
                     <div class="row text-center mt-3 g-2">
                         <div class="col-md-4">
@@ -261,6 +259,24 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script>
+        // Function to update greeting based on local time
+        function updateGreetingWithLocalTime() {
+            const now = new Date();
+            const hours = now.getHours();
+            let timeOfDay = 'morning';
+            
+            if (hours >= 6 && hours < 12) timeOfDay = 'morning';
+            else if (hours >= 12 && hours < 18) timeOfDay = 'afternoon';
+            else if (hours >= 18 && hours < 24) timeOfDay = 'evening';
+            else timeOfDay = 'night';
+            
+            // Update the greeting element
+            const greetingElement = document.getElementById('timeGreeting');
+            if (greetingElement) {
+                greetingElement.textContent = timeOfDay;
+            }
+        }
+
         // Chart initialization with better configuration
         let myLineChart, myPieChart;
 
@@ -861,6 +877,9 @@
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', () => {
+            // Update greeting with local time immediately
+            updateGreetingWithLocalTime();
+            
             // Initialize charts
             initializeCharts();
             
