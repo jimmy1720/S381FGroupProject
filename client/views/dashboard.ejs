@@ -63,21 +63,26 @@
     <main class="container mt-4">
         <% function properCase(name) {
         return String(name).trim().split(/\s+/).map(function(word) {
-            if (word === '-' || word === "'") return word;
-            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-        }).join(' ');
+        if (word === '-' || word === "'") return word;
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+            }).join(' ');
         } %>
 
         <% function currentTimeForGreeting() {
+            // Create date for Hong Kong time (UTC+8)
             const now = new Date();
-            const hours = now.getHours(); // This uses the client's local time
+            const hongKongOffset = 8 * 60; // UTC+8 in minutes
+            const localOffset = now.getTimezoneOffset(); // in minutes
+            const hongKongTime = new Date(now.getTime() + (hongKongOffset + localOffset) * 60000);
+            
+            const hours = hongKongTime.getHours();
             
             if (hours >= 6 && hours < 12) return 'morning'; // 6–11am
             else if (hours >= 12 && hours < 18) return 'afternoon'; // 12–5pm
             else if (hours >= 18 && hours < 24) return 'evening'; // 6–11pm
             else return 'night'; // 0–5am
         } %>
-
+        
         <!-- Modal for Add Transaction and Category -->
         <div class="modal fade" id="addTransaction" tabindex="-1" role="dialog" aria-labelledby="addTransactionModalLabel" aria-hidden="true">
           <div class="modal-dialog" role="document">
