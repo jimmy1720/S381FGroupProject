@@ -152,7 +152,7 @@ npm start
 ```
 **Local Account:**
 - Username: `demo_user` or Email: `demo@example.com`
-- Password: `demo123`
+- Password: `demo1234`
 
 **Social Accounts:**
 - Use any valid Facebook/Google account
