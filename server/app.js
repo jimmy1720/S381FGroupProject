@@ -6,7 +6,7 @@ const dotenv = require('dotenv');
 const morgan = require('morgan');
 const path = require('path');
 const connectDB = require('./config/db');
-const logger = require('./utils/logger'); // new logger
+const logger = require('./utils/logger');
 
 dotenv.config();
 const app = express();
@@ -23,7 +23,7 @@ const User = require('./models/User');
 const authRoutes = require('./routes/authRoutes');
 const { setupPassportSerialization, isLoggedIn } = require('./middleware/authMiddleware');
 
-// **FIX: Create session store with error handling and connection retry**
+// Create session store with error handling and connection retry**
 const createSessionStore = () => {
     const store = new MongoDBStore({
         uri: process.env.MONGODB_URI,
@@ -37,8 +37,8 @@ const createSessionStore = () => {
     });
 
     store.on('error', function(error) {
-        logger.error('Session store error:', error);
         // Don't exit process, just log the error
+        logger.error('Session store error:', error);     
     });
 
     store.on('connected', function() {
@@ -68,7 +68,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use('/public', express.static(path.join(__dirname, '../client/public')));
 
-// **FIX: Add a simple memory store fallback for development**
+// Create a simple memory store fallback for development
 const createFallbackStore = () => {
     logger.warn('⚠️  Using memory session store (fallback)');
     return new session.MemoryStore();
@@ -196,8 +196,8 @@ app.get('/dashboard', isLoggedIn, (req, res) => {
 
 // Register routes
 // Mount auth routes at both root and /auth to preserve existing template paths
-app.use('/', authRoutes);      // supports /login, /register, /profile, etc.
-app.use('/auth', authRoutes);  // supports /auth/... (used by some templates / client JS)
+app.use('/', authRoutes);      
+app.use('/auth', authRoutes);  
 
 const apiRoutes = require('./routes/apiRoutes');
 app.use('/api', apiRoutes);

@@ -61,7 +61,6 @@ router.get('/transactions', async (req, res) => {
 });
 
 // UPDATE
-// UPDATE - Fixed to handle categoryName
 router.put('/transactions/:id', async (req, res) => {
     try {
         const demoUserId = new mongoose.Types.ObjectId('000000000000000000000000');

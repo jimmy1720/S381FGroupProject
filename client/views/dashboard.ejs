@@ -267,8 +267,6 @@
             const displayNameElement = document.getElementById('userDisplayName');
             const usernameSuffixElement = document.getElementById('usernameSuffix');
             
-            // This would typically come from your server-side data
-            // For now, we'll use the existing text content and format it
             if (displayNameElement) {
                 const currentName = displayNameElement.textContent;
                 displayNameElement.textContent = properCase(currentName);
@@ -804,7 +802,7 @@
                 document.getElementById('txDesc').value = tx.description || '';
                 document.getElementById('txDate').value = tx.date.toISOString().slice(0, 10);
                 
-                // Set category limit if available - FIXED
+                // Set category limit if available
                 if (tx.original && tx.original.categoryId) {
                     // Get the current category's budget limit
                     const categoryRes = await fetch(`/api/categories?kind=${tx.type}`);
