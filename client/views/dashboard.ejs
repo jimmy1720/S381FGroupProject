@@ -61,24 +61,6 @@
     </header>
 
     <main class="container mt-4">
-        <% function properCase(name) {
-        return String(name).trim().split(/\s+/).map(function(word) {
-        if (word === '-' || word === "'") return word;
-        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-            }).join(' ');
-        } %>
-
-        <% function currentTimeForGreeting() {
-            // Use server time as fallback, but client-side JS will update it
-            const now = new Date();
-            const hours = now.getHours();
-            
-            if (hours >= 6 && hours < 12) return 'morning'; // 6–11am
-            else if (hours >= 12 && hours < 18) return 'afternoon'; // 12–5pm
-            else if (hours >= 18 && hours < 24) return 'evening'; // 6–11pm
-            else return 'night'; // 0–5am
-        } %>
-        
         <!-- Modal for Add Transaction and Category -->
         <div class="modal fade" id="addTransaction" tabindex="-1" role="dialog" aria-labelledby="addTransactionModalLabel" aria-hidden="true">
           <div class="modal-dialog" role="document">
@@ -134,13 +116,8 @@
             <!-- Greetings and Overview -->
             <div class="col-lg-8 col-md-7">
                 <div class="card p-4 h-100">
-                    <% 
-                      // Prefer displayName for greeting; show username in parens when different
-                      const displayName = (user && user.displayName) ? user.displayName : (user && user.username) || '';
-                      const showUsername = user && user.displayName && user.username && user.displayName.toLowerCase() !== user.username.toLowerCase();
-                    %>
                     <h2 class="card-title h4" id="greetingElement">
-                        Good <span id="timeGreeting"><%= currentTimeForGreeting() %></span>, <%= properCase(displayName) %><%= showUsername ? ' (' + user.username + ')' : '' %>.
+                        Good <span id="timeGreeting">day</span>, <span id="userDisplayName"><%= user ? (user.displayName || user.username || 'User') : 'User' %></span><span id="usernameSuffix"></span>.
                     </h2>
                     <p class="card-text text-muted">Here is a quick overview of your budget and expenses.</p>
                     <div class="row text-center mt-3 g-2">
@@ -274,6 +251,27 @@
             const greetingElement = document.getElementById('timeGreeting');
             if (greetingElement) {
                 greetingElement.textContent = timeOfDay;
+            }
+        }
+
+        // Function to format name in proper case
+        function properCase(name) {
+            return String(name).trim().split(/\s+/).map(function(word) {
+                if (word === '-' || word === "'") return word;
+                return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+            }).join(' ');
+        }
+
+        // Function to update user display name
+        function updateUserDisplayName() {
+            const displayNameElement = document.getElementById('userDisplayName');
+            const usernameSuffixElement = document.getElementById('usernameSuffix');
+            
+            // This would typically come from your server-side data
+            // For now, we'll use the existing text content and format it
+            if (displayNameElement) {
+                const currentName = displayNameElement.textContent;
+                displayNameElement.textContent = properCase(currentName);
             }
         }
 
@@ -879,6 +877,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Update greeting with local time immediately
             updateGreetingWithLocalTime();
+            updateUserDisplayName();
             
             // Initialize charts
             initializeCharts();
