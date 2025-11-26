@@ -287,8 +287,8 @@ curl -X PUT https://budget-tracker-grp16-s381f.onrender.com/public/api/transacti
   -H "Content-Type: application/json" \
   -d '{
     "amount": 150,
-    "description": "Lunch with friends",
-    "categoryName": "Dining"
+    "categoryName": "Dining",
+    "description": "Lunch with friends"
   }'
 ```
 
