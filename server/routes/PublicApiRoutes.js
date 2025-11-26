@@ -61,14 +61,45 @@ router.get('/transactions', async (req, res) => {
 });
 
 // UPDATE
+// UPDATE - Fixed to handle categoryName
 router.put('/transactions/:id', async (req, res) => {
     try {
         const demoUserId = new mongoose.Types.ObjectId('000000000000000000000000');
+        const { amount, type, categoryName, description, date } = req.body;
+        
+        // Build update object
+        const updateData = {
+            amount: parseFloat(amount),
+            description: description,
+            date: date ? new Date(date) : new Date()
+        };
+
+        // If categoryName is provided, find/create that category and update categoryId
+        if (categoryName) {
+            let category = await BudgetCategory.findOne({ 
+                name: categoryName, 
+                userId: demoUserId 
+            });
+            
+            if (!category) {
+                // Create new category if it doesn't exist
+                category = new BudgetCategory({
+                    name: categoryName,
+                    type: type || 'expense',
+                    userId: demoUserId
+                });
+                await category.save();
+            }
+            
+            updateData.categoryId = category._id;
+        }
+
+        // Update the transaction
         const transaction = await Transaction.findOneAndUpdate(
             { _id: req.params.id, userId: demoUserId },
-            req.body,
+            updateData,
             { new: true }
-        );
+        ).populate('categoryId', 'name');
         
         if (!transaction) {
             return res.status(404).json({ error: 'Transaction not found' });
@@ -76,7 +107,8 @@ router.put('/transactions/:id', async (req, res) => {
         
         res.json({ success: true, transaction });
     } catch (err) {
-        res.status(500).json({ error: 'Update failed' });
+        console.error('UPDATE error:', err);
+        res.status(500).json({ error: 'Update failed: ' + err.message });
     }
 });
 
