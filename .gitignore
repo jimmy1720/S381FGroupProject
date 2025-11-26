@@ -30,4 +30,4 @@ tmp/
 
 # Miscellaneous
 *.bak            # Backup files
-*.swp            # Swap files
+*.swp            # Swap files.env
