@@ -54,7 +54,9 @@
                     <a href="/settings" class="btn btn-outline-light btn-sm me-2" title="Settings">
                         <i class="bi bi-gear"></i>
                     </a>
-                    <button onclick="location.href='/'" class="btn btn-outline-light btn-sm">Logout</button>
+                    <form action="/logout" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+                    </form>
                 </div>
             </div>
         </nav>

@@ -14,14 +14,14 @@ const app = express();
 // Ensure PORT is defined
 const PORT = process.env.PORT || 8099;
 
-// Require missing modules used later
+// Import OAuth strategies
 const FacebookStrategy = require('passport-facebook').Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('./models/User');
 
 // Import routes and middleware
 const authRoutes = require('./routes/authRoutes');
-const { setupPassportSerialization, isLoggedIn } = require('./middleware/authMiddleware');
+const { setupPassportSerialization, isLoggedIn, noCache } = require('./middleware/authMiddleware');
 
 // Create session store with error handling and connection retry**
 const createSessionStore = () => {
@@ -67,6 +67,11 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use('/public', express.static(path.join(__dirname, '../client/public')));
+
+// Apply cache control to protected routes
+app.use('/dashboard', noCache);
+app.use('/profile', noCache);
+app.use('/settings', noCache);
 
 // Create a simple memory store fallback for development
 const createFallbackStore = () => {
@@ -190,7 +195,7 @@ app.get('/', (req, res) => {
     res.render('index', { title: 'Home', user: req.user });
 });
 
-app.get('/dashboard', isLoggedIn, (req, res) => {
+app.get('/dashboard', isLoggedIn, noCache, (req, res) => {
     res.render('dashboard', { user: req.user, pie_chart_x:[], pie_chart_y:[], line_graph_x:[], line_graph_y:[] });
 });
 

@@ -5,8 +5,6 @@ const { isLoggedIn } = require('../middleware/authMiddleware');
 const authController = require('../controllers/authController');
 const passwordController = require('../controllers/passwordController');
 
-
-
 // Render login page
 router.get("/login", (req, res) => {
     res.render("login", { 
@@ -112,13 +110,40 @@ router.post('/api/update-profile', isLoggedIn, express.json(), authController.up
 router.post('/update-settings', isLoggedIn, express.urlencoded({ extended: true }), authController.updateSettings);
 router.post('/api/update-settings', isLoggedIn, express.json(), authController.updateSettings);
 
-// Logout route
+// Logout route - FIXED VERSION
+router.post("/logout", (req, res, next) => {
+    req.logout((err) => {
+        if (err) { 
+            return next(err); 
+        }
+        // Destroy the session completely
+        req.session.destroy((err) => {
+            if (err) {
+                console.error('Session destruction error:', err);
+                return res.status(500).send('Could not log out.');
+            }
+            // Clear the session cookie
+            res.clearCookie('connect.sid');
+            // Redirect to login with cache busting
+            res.redirect('/login?t=' + Date.now());
+        });
+    });
+});
+
+// Keep GET logout for backwards compatibility but make it work properly
 router.get("/logout", (req, res, next) => {
     req.logout((err) => {
         if (err) { 
             return next(err); 
         }
-        res.redirect('/login');
+        req.session.destroy((err) => {
+            if (err) {
+                console.error('Session destruction error:', err);
+                return res.status(500).send('Could not log out.');
+            }
+            res.clearCookie('connect.sid');
+            res.redirect('/login?t=' + Date.now());
+        });
     });
 });
 

@@ -16,6 +16,14 @@ function isNotLoggedIn(req, res, next) {
     res.redirect('/dashboard');
 }
 
+// Cache control middleware for protected pages
+function noCache(req, res, next) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    next();
+}
+
 // Passport serialization/deserialization
 function setupPassportSerialization(passport) {
     passport.serializeUser((user, done) => {
@@ -35,5 +43,6 @@ function setupPassportSerialization(passport) {
 module.exports = {
     isLoggedIn,
     isNotLoggedIn,
-    setupPassportSerialization
+    setupPassportSerialization,
+    noCache
 };

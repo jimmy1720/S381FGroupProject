@@ -89,7 +89,9 @@
     </div>
 
     <a href="/dashboard" class="btn btn-outline-secondary">Back to Dashboard</a>
-    <a href="/auth/logout" class="btn btn-link text-danger">Logout</a>
+    <form action="/auth/logout" method="POST" style="display: inline;">
+      <button type="submit" class="btn btn-link text-danger">Logout</button>
+    </form>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
