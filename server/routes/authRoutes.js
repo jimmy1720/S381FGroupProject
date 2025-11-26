@@ -110,7 +110,7 @@ router.post('/api/update-profile', isLoggedIn, express.json(), authController.up
 router.post('/update-settings', isLoggedIn, express.urlencoded({ extended: true }), authController.updateSettings);
 router.post('/api/update-settings', isLoggedIn, express.json(), authController.updateSettings);
 
-// Logout route - FIXED VERSION
+// Logout route
 router.post("/logout", (req, res, next) => {
     req.logout((err) => {
         if (err) { 
